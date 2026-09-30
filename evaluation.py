@@ -72,9 +72,8 @@ def evaluate_map_accuracy(gt_h_walls=None, gt_v_walls=None):
 
 
 def save_outputs(round_name=None, generate_plot=True):
-    """Save trajectory CSV, walls CSV, signs CSV, and optionally high-res SLAM plot."""
+    """Save trajectory CSV, signs CSV, and optionally high-res SLAM plot."""
     log_file = os.path.join(OUTPUT_DIR, "exploration_log.csv")
-    walls_file = os.path.join(OUTPUT_DIR, "walls_data.csv")
     signs_file = os.path.join(OUTPUT_DIR, "signs_data.csv")
     img_name = f"robot_trajectory_{round_name}.png" if round_name else "robot_trajectory.png"
     img_file = os.path.join(OUTPUT_DIR, img_name)
@@ -100,15 +99,6 @@ def save_outputs(round_name=None, generate_plot=True):
             xm = round((vx - 0.5) * config.GRID_SIZE_M, 3)
             ym = round((vy - 0.5) * config.GRID_SIZE_M, 3)
             w.writerow([vx, vy, xm, ym])
-
-    # Export foam walls coordinates for external analysis (e.g., MATLAB)
-    with open(walls_file, "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["type", "x", "y"])
-        for wx, wy in sorted(state.detected_h_walls):
-            w.writerow(["H", wx, wy])
-        for wx, wy in sorted(state.detected_v_walls):
-            w.writerow(["V", wx, wy])
 
     with open(signs_file, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -352,7 +342,7 @@ def save_outputs(round_name=None, generate_plot=True):
         plt.close(fig)
 
         import shutil
-        for fname in ["exploration_log.csv", "trajectory_log.csv", "visited_cells.csv", "walls_data.csv", "signs_data.csv"]:
+        for fname in ["exploration_log.csv", "trajectory_log.csv", "visited_cells.csv", "signs_data.csv"]:
             src = os.path.join(OUTPUT_DIR, fname)
             if os.path.exists(src):
                 dst_results = os.path.join(results_dir, fname)
@@ -363,26 +353,28 @@ def save_outputs(round_name=None, generate_plot=True):
                     shutil.copy2(src, dst_code)
 
         print(f"บันทึกไฟล์ผลลัพธ์ทั้งหมดไว้ที่: {results_dir}")
-        print("-> exploration_log.csv, trajectory_log.csv, visited_cells.csv, walls_data.csv, signs_data.csv, final_slam_map.png เรียบร้อยแล้ว")
+        print("-> exploration_log.csv, trajectory_log.csv, visited_cells.csv, signs_data.csv, final_slam_map.png เรียบร้อยแล้ว")
     except Exception as e:
         print(f"ไม่สามารถบันทึกรูปภาพได้: {e}")
 
 
 def re_evaluate_from_saved():
     """
-    โหลดข้อมูลแนวกำแพงและประวัติการเดินจากไฟล์ CSV ที่บันทึกไว้
+    โหลดข้อมูลแนวกำแพงและประวัติการเดินจากไฟล์ที่บันทึกไว้
     นำมาคำนวณ Map Accuracy เทียบกับ Ground Truth ใน config.py อีกครั้ง
     โดยไม่ต้องนำหุ่นไปวิ่งใหม่
     """
     import config
     import importlib
+    import json
     importlib.reload(config)
 
+    map_file = os.path.join(os.path.dirname(OUTPUT_DIR), "maps", "mission_map.json")
     walls_file = os.path.join(OUTPUT_DIR, "walls_data.csv")
     log_file = os.path.join(OUTPUT_DIR, "exploration_log.csv")
 
-    if not os.path.exists(walls_file) or not os.path.exists(log_file):
-        print("⚠️ ไม่พบไฟล์ walls_data.csv หรือ exploration_log.csv กรุณารันหุ่นยนต์หรือ simulation อย่างน้อย 1 ครั้งก่อน")
+    if not os.path.exists(log_file):
+        print("⚠️ ไม่พบไฟล์ exploration_log.csv กรุณารันหุ่นยนต์หรือ simulation อย่างน้อย 1 ครั้งก่อน")
         return
 
     state.detected_h_walls.clear()
@@ -391,18 +383,27 @@ def re_evaluate_from_saved():
     state.discovered_cells.clear()
     state.trajectory.clear()
 
-    # 1. โหลดแนวกำแพงที่หุ่นเคยสแกนพบ
-    with open(walls_file, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        header = next(reader, None)
-        for row in reader:
-            if not row or len(row) < 3:
-                continue
-            w_type, wx, wy = row[0].strip(), int(row[1]), int(row[2])
-            if w_type == "H":
-                state.detected_h_walls.add((wx, wy))
-            elif w_type == "V":
-                state.detected_v_walls.add((wx, wy))
+    # 1. โหลดแนวกำแพงจาก mission_map.json หรือ walls_data.csv
+    if os.path.exists(map_file):
+        try:
+            with open(map_file, "r", encoding="utf-8") as f:
+                mdata = json.load(f)
+                state.detected_h_walls.update(tuple(w) for w in mdata.get("h_walls", []))
+                state.detected_v_walls.update(tuple(w) for w in mdata.get("v_walls", []))
+        except Exception:
+            pass
+    elif os.path.exists(walls_file):
+        with open(walls_file, "r", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            header = next(reader, None)
+            for row in reader:
+                if not row or len(row) < 3:
+                    continue
+                w_type, wx, wy = row[0].strip(), int(row[1]), int(row[2])
+                if w_type == "H":
+                    state.detected_h_walls.add((wx, wy))
+                elif w_type == "V":
+                    state.detected_v_walls.add((wx, wy))
 
     # 2. โหลดประวัติการเดินและช่องที่เคยไป
     prev_cell = None
