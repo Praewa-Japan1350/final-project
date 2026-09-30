@@ -280,9 +280,6 @@ python run.py --sim
 
 ## 👥 ผู้พัฒนา (Credits)
 - **RoboMaster SLAM Project Team**
-- **Repository**: [Praewa-Japan1350/final-project](https://github.com/Praewa-Japan1350/final-project.git)
-
-สมาชิกในกลุ่ม
 
 6810110096 นายณัฐพนธ แก้วประดับ
 
@@ -291,3 +288,5 @@ python run.py --sim
 6810110242 นางสาวแพรวา แก้วเจริญ
 
 6810110566 นายชนาธิป นุ้ยสี
+
+- **Repository**: [Praewa-Japan1350/final-project](https://github.com/Praewa-Japan1350/final-project.git)
