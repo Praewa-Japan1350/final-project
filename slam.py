@@ -281,7 +281,7 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
         # robot toward a single wall and drifting off the grid.
         if ep_gimbal and not sim_mode:
             _safe_wait(ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=target_yaw, pitch_speed=COLOR_SCAN_SPEED,
-                             yaw_speed=GIMBAL_SPEED), timeout=1.5)
+                             yaw_speed=GIMBAL_SPEED), timeout=3.0)
         # Hold the chassis still before collecting the final target frames.
         stop_and_settle(ep_chassis, sim_mode, settle_s=0.35)
         target_range = read_target_range_at_yaw(ep_gimbal, position, target_heading, target_yaw, sim_mode)
@@ -339,7 +339,7 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
         elif dashboard:
             dashboard.log(f"⚠️ ไม่พบเป้าหมายสดด้าน {target_heading} (อาจติดมุมแสง) ข้ามไปเป้าหมายถัดไป")
         if ep_gimbal and not sim_mode:
-            _safe_wait(ep_gimbal.recenter(), timeout=1.5)
+            _safe_wait(ep_gimbal.recenter(), timeout=3.0)
         targets.remove(target)
         step += 1
 
@@ -492,8 +492,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
         step = 0
         round_started = time.monotonic()
         is_mapping_round = run_mode in ("mapping", "slam_only", "slam")
-        round_limit_s = getattr(config, "ROUND1_LIMIT_S", 900) if is_mapping_round else getattr(config, "ROUND2_LIMIT_S", 600)
+        round_limit_s = getattr(config, "ROUND2_LIMIT_S", 600)  # 10 minutes (600s) threshold for notification
         round_label = "round1" if is_mapping_round else "round2"
+        warned_10min = False
 
         # Ensure timer is active on dashboard if not already started by GUI button
         if dashboard and hasattr(dashboard, "start_timer") and not dashboard._timer_running:
@@ -506,12 +507,14 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             if is_mapping_round:
                 dashboard.log("=" * 60)
                 dashboard.log("🗺️ [ROUND 1 - SLAM] เริ่มต้นรอบที่ 1: เดินสำรวจและสร้างแผนที่ด้วย SLAM")
-                dashboard.log(f"   ▸ เวลาสูงสุด: {round_limit_s // 60} นาที | จุดเริ่มต้น {position} ทิศ {heading}")
+                dashboard.log(f"   ▸ โหมด: วิ่งสำรวจต่อเนื่องจนจบครบทุกช่อง (แจ้งเตือนเมื่อเกิน 10 นาที)")
+                dashboard.log(f"   ▸ จุดเริ่มต้น: {position} ทิศ {heading}")
                 dashboard.log("=" * 60)
             else:
                 dashboard.log("=" * 60)
                 dashboard.log("⭐ [ROUND 2 - A*] เริ่มต้นรอบที่ 2: นำทางค้นหาและยิงเป้าหมายด้วย A* Algorithm")
-                dashboard.log(f"   ▸ เวลาสูงสุด: {round_limit_s // 60} นาที | จุดเริ่มต้น {position} ทิศ {heading}")
+                dashboard.log(f"   ▸ โหมด: ยิงเป้าหมายจนครบทุกเป้า (แจ้งเตือนเมื่อเกิน 10 นาที)")
+                dashboard.log(f"   ▸ จุดเริ่มต้น: {position} ทิศ {heading}")
                 dashboard.log("=" * 60)
 
         # Start 10-second periodic background autosave worker thread
@@ -540,16 +543,24 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             position, heading = _run_target_round(
                 ep_chassis, ep_gimbal, ep_blaster, camera_reader, position, heading,
                 sim_mode, dashboard, step, color_filter, shape_filter,
-                vision_analyzer=vision_analyzer, deadline=round_started + round_limit_s,
+                vision_analyzer=vision_analyzer, deadline=None,
             )
-            if time.monotonic() >= round_started + round_limit_s:
-                state.stop_requested = True
 
         # ติดตามช่องที่เคยสแกนหาเป้าหมายไปแล้ว เพื่อไม่ให้เสียเวลาสแกนซ้ำเมื่อเดินผ่าน
         scanned_target_cells = set()
 
-        while (not state.stop_requested and is_mapping_round
-               and time.monotonic() - round_started < round_limit_s):
+        while not state.stop_requested and is_mapping_round:
+            # แจ้งเตือนเมื่อเวลาเกิน 10 นาที (600s) แต่ให้หุ่นยนต์รันต่อไปจนจบครบแมพ ไม่หยุดชะงัก
+            elapsed_now = time.monotonic() - round_started
+            if elapsed_now >= 600 and not warned_10min:
+                warned_10min = True
+                warn_msg = f"⚠️ [แจ้งเตือนเวลา] เวลาการทำงานเกิน 10 นาทีแล้ว ({int(elapsed_now // 60)}:{int(elapsed_now % 60):02d}) — หุ่นยนต์จะวิ่งต่อจนกว่าจะสำรวจครบทุกช่องของแผนที่!"
+                print(f"\n{warn_msg}\n")
+                if dashboard:
+                    dashboard.log("=" * 60)
+                    dashboard.log(warn_msg)
+                    dashboard.log("=" * 60)
+
             # Stop and let chassis motion settle before every gimbal scan
             stop_and_settle(ep_chassis, sim_mode, settle_s=0.18)
             align_heading(ep_chassis, heading, sim_mode)
@@ -715,20 +726,27 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                 # mark this edge as impassable so pathfinding will navigate around it to reach
                 # all remaining unvisited cells in the maze.
                 if not obstacle_stop and not crossed_into_next_cell:
-                    x, y = position
-                    if heading == "NORTH":
-                        state.detected_h_walls.add((x, y))
-                    elif heading == "SOUTH":
-                        state.detected_h_walls.add((x, y - 1))
-                    elif heading == "EAST":
-                        state.detected_v_walls.add((x, y))
-                    elif heading == "WEST":
-                        state.detected_v_walls.add((x - 1, y))
-                    if dashboard:
-                        dashboard.log(
-                            f"⚠️ เดินหน้าไม่สำเร็จ ({state.last_move_reason}) "
-                            f"-> บันทึกสิ่งกีดขวาง และคำนวณเส้นทางอื่นเพื่อสำรวจช่องที่เหลือให้ครบทั้งแมพ"
-                        )
+                    if state.last_move_reason not in {"TOF_INVALID", "CANCELLED"}:
+                        x, y = position
+                        if heading == "NORTH":
+                            state.detected_h_walls.add((x, y))
+                        elif heading == "SOUTH":
+                            state.detected_h_walls.add((x, y - 1))
+                        elif heading == "EAST":
+                            state.detected_v_walls.add((x, y))
+                        elif heading == "WEST":
+                            state.detected_v_walls.add((x - 1, y))
+                        if dashboard:
+                            dashboard.log(
+                                f"⚠️ เดินหน้าไม่สำเร็จ ({state.last_move_reason}) "
+                                f"-> บันทึกสิ่งกีดขวาง และคำนวณเส้นทางอื่นเพื่อสำรวจช่องที่เหลือให้ครบทั้งแมพ"
+                            )
+                    else:
+                        if dashboard:
+                            dashboard.log(
+                                f"⚠️ สัญญาณเซนเซอร์ขัดข้องชั่วคราว ({state.last_move_reason}) "
+                                f"-> ข้ามการเดินรอบนี้โดยไม่บันทึกกำแพงปลอม เพื่อลองใหม่ในรอบถัดไป"
+                            )
 
             step += 1
 
@@ -748,9 +766,8 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
         print(f"• จุดเริ่มต้น  : {start_pos} | จุดสิ้นสุด: {position}")
         print("=======================================================\n")
         elapsed = time.monotonic() - round_started
-        if elapsed >= round_limit_s:
-            if dashboard:
-                dashboard.log(f"Time limit reached ({round_limit_s // 60} minutes); ending {round_label}.")
+        if dashboard:
+            dashboard.log(f"⏱️ เวลาการทำงานรวม {int(elapsed // 60)} นาที {int(elapsed % 60):02d} วินาที (จบภารกิจสมบูรณ์)")
         save_outputs(round_label)
 
         if is_mapping_round:
@@ -835,7 +852,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                 pass
         if ep_gimbal:
             try:
-                _safe_wait(ep_gimbal.recenter(), timeout=2.0)
+                _safe_wait(ep_gimbal.recenter(), timeout=3.0)
             except Exception:
                 pass
         if vision_analyzer:

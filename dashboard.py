@@ -907,6 +907,7 @@ class Dashboard:
 
             self._timer_start_time = now
             self._timer_running = True
+            self._warned_10min = False
 
             self.lbl_timer_main.config(fg="#38bdf8", bg="#0f172a", text="00:00.0")
             self.lbl_timer_status.config(
@@ -940,7 +941,18 @@ class Dashboard:
         if self._timer_start_time is not None:
             round_elapsed = now - self._timer_start_time
             time_str = self._format_time_str(round_elapsed)
-            self.lbl_timer_main.config(text=time_str)
+
+            # Warning if exceeding 10 minutes (600s), but KEEP TICKING and running
+            if round_elapsed >= 600:
+                self.lbl_timer_main.config(text=time_str, fg="#f59e0b")
+                if not getattr(self, "_warned_10min", False):
+                    self._warned_10min = True
+                    self.lbl_timer_status.config(
+                        text=f"⚠️ เวลาเกิน 10 นาที ({time_str}) - กำลังทำงานต่อเนื่องจนครบแมพ...",
+                        fg="#d97706"
+                    )
+            else:
+                self.lbl_timer_main.config(text=time_str, fg="#38bdf8")
 
             if self._active_round_key == "round1":
                 self.lbl_round1_time.config(

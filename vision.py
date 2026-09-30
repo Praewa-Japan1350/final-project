@@ -163,22 +163,25 @@ def is_chick_hostage(view, bbox, color, shape):
     """
     ตรวจสอบตัวประกัน (ลูกไก่ / Yellow Chick Hostage) ที่ห้ามยิงเด็ดขาด:
     - สีเหลือง (Yellow)
-    - ต้องไม่เหมารวมป้ายสีเหลืองวงกลมบนกำแพง (ป้ายวงกลมบนกำแพงคือเป้าหมายที่ต้องยิง)
+    - ต้องไม่เหมารวมป้ายสีเหลืองวงกลม/จัตุรัส/แนวนอน/แนวตั้งบนกำแพง
     - ป้ายเป้าหมายบนกำแพงจะลอยอยู่ระดับกลางกำแพง (bottom_ratio < 0.68) เสมอ
     - ลูกไก่ (Chick) คือตุ๊กตาที่วางอยู่บนพื้น:
-      1. ระดับความสูงติดพื้น (bottom_ratio = (by + bh) / h >= 0.68)
-      2. มีเท้าสีส้ม (Orange feet) ใต้ลำตัว หรือจะงอยปากสีส้ม (Orange beak)
-      3. หรือเป็นวัตถุสีเหลืองทรงตุ๊กตาตั้งอยู่บนพื้นโดยตรง (bottom_ratio >= 0.76)
+      1. มีรูปร่างไม่สม่ำเสมอ (ไม่ใช่ circle, square, horizontal, vertical)
+      2. ระดับความสูงติดพื้น (bottom_ratio = (by + bh) / h >= 0.68)
+      3. มีเท้าสีส้ม (Orange feet) ใต้ลำตัว หรือจะงอยปากสีส้ม (Orange beak)
     """
     if color != "yellow":
         return False
-    # ป้ายสีเหลืองแนวนอนบนกำแพง ไม่ใช่ลูกไก่
-    if shape == "horizontal":
+    # ป้ายเป้าหมายบนกำแพงมีรูปทรงเรขาคณิตชัดเจน (circle, square, horizontal, vertical)
+    # ลูกไก่ตุ๊กตามีรูปร่างไม่สม่ำเสมอ -> shape classifier จะไม่ match เป็นทรงเหล่านี้
+    # ดังนั้นถ้า detect ได้เป็น circle/square/horizontal/vertical = ป้ายเป้าหมายแน่นอน
+    if shape in ("circle", "square", "horizontal", "vertical"):
         return False
 
     h, w = view.shape[:2]
     bx, by, bw, bh = bbox
     bottom_ratio = (by + bh) / float(h)
+    top_ratio = by / float(h)
     aspect_ratio = bw / float(bh) if bh > 0 else 1.0
 
     # ป้ายเป้าหมายติดอยู่บนกำแพง ลอยเหนือพื้นชัดเจน (bottom_ratio < 0.68) -> ไม่ใช่ลูกไก่แน่นอน
@@ -201,12 +204,16 @@ def is_chick_hostage(view, bbox, color, shape):
         )
         orange_pixels = cv2.countNonZero(orange_mask)
 
-    # 1. พบเท้า/ปากสีส้มเด่นชัด และวัตถุอยู่ระดับพื้น (bottom_ratio >= 0.68)
-    if orange_pixels >= 30 and bottom_ratio >= 0.68:
+    # 1. พบเท้า/ปากสีส้มเด่นชัด (>= 80 pixels) และวัตถุอยู่ระดับพื้น (bottom_ratio >= 0.68)
+    #    เพิ่มจาก 30 -> 80 pixels เพื่อลด false positive จากกำแพงโทนอุ่น
+    if orange_pixels >= 80 and bottom_ratio >= 0.68:
         return True
 
-    # 2. วัตถุสีเหลืองวางอยู่บนพื้นอย่างชัดเจน (bottom_ratio >= 0.76) สัดส่วนทรงตุ๊กตาลูกไก่
-    if bottom_ratio >= 0.76 and 0.55 <= aspect_ratio <= 1.45 and bh >= 60:
+    # 2. วัตถุสีเหลืองวางอยู่บนพื้นอย่างชัดเจน — ต้องติดขอบล่างจริงๆ
+    #    bottom_ratio >= 0.85 (ขอบล่างอยู่ใน 15% ล่างสุดของเฟรม = บนพื้นแน่ๆ)
+    #    top_ratio >= 0.55 (ขอบบนอยู่ครึ่งล่างของเฟรม = ไม่ใช่ป้ายบนกำแพง)
+    if (bottom_ratio >= 0.85 and top_ratio >= 0.55
+            and 0.55 <= aspect_ratio <= 1.45 and bh >= 60):
         return True
 
     return False
