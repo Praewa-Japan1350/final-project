@@ -163,9 +163,12 @@ def is_chick_hostage(view, bbox, color, shape):
     """
     ตรวจสอบตัวประกัน (ลูกไก่ / Yellow Chick Hostage) ที่ห้ามยิงเด็ดขาด:
     - สีเหลือง (Yellow)
-    - หากตรวจจับได้เป็น 'circle' (ทรงกลม/รีตามที่ผู้ใช้ระบุ: 'หากในตอนรันจริงจับได้สีเหลืองวงกลมแล้วกล้องไปจับลูกไก่ได้ก็ห้ามยิงให้ detect เป็นตัวประกันไว้เท่านั้น')
-    - หรือวัตถุสีเหลืองที่วางอยู่ระดับพื้นด้านล่าง (Floor level: (y+h)/H >= 0.75) พร้อมเท้าสีส้ม (Orange feet)
-    - ไม่ใช่แผ่นป้ายสี่เหลี่ยมผืนผ้าแนวนอน ('horizontal') บนกำแพง
+    - ต้องไม่เหมารวมป้ายสีเหลืองวงกลมบนกำแพง (ป้ายวงกลมบนกำแพงคือเป้าหมายที่ต้องยิง)
+    - ป้ายเป้าหมายบนกำแพงจะลอยอยู่ระดับกลางกำแพง (bottom_ratio < 0.68) เสมอ
+    - ลูกไก่ (Chick) คือตุ๊กตาที่วางอยู่บนพื้น:
+      1. ระดับความสูงติดพื้น (bottom_ratio = (by + bh) / h >= 0.68)
+      2. มีเท้าสีส้ม (Orange feet) ใต้ลำตัว หรือจะงอยปากสีส้ม (Orange beak)
+      3. หรือเป็นวัตถุสีเหลืองทรงตุ๊กตาตั้งอยู่บนพื้นโดยตรง (bottom_ratio >= 0.76)
     """
     if color != "yellow":
         return False
@@ -178,24 +181,32 @@ def is_chick_hostage(view, bbox, color, shape):
     bottom_ratio = (by + bh) / float(h)
     aspect_ratio = bw / float(bh) if bh > 0 else 1.0
 
-    # 1. ข้อกำหนดจากผู้ใช้: สีเหลืองวงกลม คือตัวประกัน (ลูกไก่)
-    if shape == "circle":
+    # ป้ายเป้าหมายติดอยู่บนกำแพง ลอยเหนือพื้นชัดเจน (bottom_ratio < 0.68) -> ไม่ใช่ลูกไก่แน่นอน
+    if bottom_ratio < 0.68:
+        return False
+
+    # ตรวจสอบเท้าสีส้มใต้ตัวลูกไก่ หรือจะงอยปากสีส้ม (Orange feet/beak HSV)
+    feet_y0 = max(0, by + int(bh * 0.55))
+    feet_y1 = min(h, by + bh + 45)
+    feet_x0 = max(0, bx - 25)
+    feet_x1 = min(w, bx + bw + 25)
+    orange_roi = view[feet_y0:feet_y1, feet_x0:feet_x1]
+    orange_pixels = 0
+    if orange_roi.size > 0:
+        roi_hsv = cv2.cvtColor(orange_roi, cv2.COLOR_BGR2HSV)
+        orange_mask = cv2.inRange(
+            roi_hsv,
+            np.array([5, 80, 70], dtype=np.uint8),
+            np.array([19, 255, 255], dtype=np.uint8),
+        )
+        orange_pixels = cv2.countNonZero(orange_mask)
+
+    # 1. พบเท้า/ปากสีส้มเด่นชัด และวัตถุอยู่ระดับพื้น (bottom_ratio >= 0.68)
+    if orange_pixels >= 30 and bottom_ratio >= 0.68:
         return True
 
-    # 2. ตรวจสอบเท้าสีส้มใต้ตัวลูกไก่ (Orange feet HSV)
-    feet_y0 = max(0, by + int(bh * 0.65))
-    feet_y1 = min(h, by + bh + 45)
-    feet_x0 = max(0, bx - 15)
-    feet_x1 = min(w, bx + bw + 15)
-    feet_roi = view[feet_y0:feet_y1, feet_x0:feet_x1]
-    if feet_roi.size > 0:
-        feet_hsv = cv2.cvtColor(feet_roi, cv2.COLOR_BGR2HSV)
-        orange_mask = cv2.inRange(feet_hsv, np.array([5, 85, 70], dtype=np.uint8), np.array([19, 255, 255], dtype=np.uint8))
-        if cv2.countNonZero(orange_mask) > 35 and bottom_ratio >= 0.70:
-            return True
-
-    # 3. วัตถุสีเหลืองตั้งอยู่บนพื้นตรงฐานกำแพง (Floor base: bottom_ratio >= 0.80) ที่ไม่ใช่แนวนอน
-    if bottom_ratio >= 0.80 and aspect_ratio <= 1.25 and bh >= 80:
+    # 2. วัตถุสีเหลืองวางอยู่บนพื้นอย่างชัดเจน (bottom_ratio >= 0.76) สัดส่วนทรงตุ๊กตาลูกไก่
+    if bottom_ratio >= 0.76 and 0.55 <= aspect_ratio <= 1.45 and bh >= 60:
         return True
 
     return False
