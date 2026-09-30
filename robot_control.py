@@ -15,7 +15,6 @@ import vision as vision_config
 
 from config import (
     BLASTER_FIRE_TYPE,
-    BLASTER_PITCH_UP_DEG,
     DEADBAND_M,
     DELTA,
     DIRECTIONS,
@@ -43,6 +42,8 @@ from config import (
 )
 from navigation import is_wall_distance, sim_has_wall_between
 import state
+
+BLASTER_PITCH_UP_DEG = getattr(config, "BLASTER_PITCH_UP_DEG", 8.0)
 from vision import (
     CAMERA_HFOV_DEG,
     CAMERA_VFOV_DEG,
