@@ -15,6 +15,7 @@ import vision as vision_config
 
 from config import (
     BLASTER_FIRE_TYPE,
+    BLASTER_PITCH_UP_DEG,
     DEADBAND_M,
     DELTA,
     DIRECTIONS,
@@ -557,8 +558,8 @@ def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard
 
 
 def aim_gimbal_at_detection(ep_gimbal, detection, frame_shape, yaw_offset=0.0,
-                            aim_y_fraction=0.30, lock_yaw=False, pitch_up_deg=7.5):
-    """Aim gimbal at the detected target, tilted up (+7.5°) so the blaster below the camera hits the sign."""
+                            aim_y_fraction=0.30, lock_yaw=False, pitch_up_deg=BLASTER_PITCH_UP_DEG):
+    """Aim gimbal at the detected target, tilted up (+8.0°) so the blaster below the camera hits the sign."""
     if not ep_gimbal or frame_shape is None:
         return None
     frame_height, frame_width = frame_shape[:2]
@@ -573,7 +574,7 @@ def aim_gimbal_at_detection(ep_gimbal, detection, frame_shape, yaw_offset=0.0,
     vertical_fov = CAMERA_VFOV_DEG * (CROP_Y[1] - CROP_Y[0]) / zoom
     yaw = (yaw_offset if lock_yaw else
            max(-240.0, min(240.0, yaw_offset + dx / frame_width * horizontal_fov)))
-    # Elevate pitch by pitch_up_deg (+7.5°) to compensate for the blaster barrel being below the camera lens,
+    # Elevate pitch by pitch_up_deg (+8.0°) to compensate for the blaster barrel being below the camera lens,
     # ensuring the shot hits the center of the sign and does not strike the stand below it.
     pitch = max(-20.0, min(30.0, COLOR_SCAN_PITCH - dy / frame_height * vertical_fov + pitch_up_deg))
     completed = ep_gimbal.moveto(pitch=pitch, yaw=yaw, pitch_speed=90,
@@ -650,16 +651,16 @@ def aim_verify_and_fire(ep_chassis, ep_gimbal, ep_blaster, camera_reader, detect
         dashboard.set_aim_reticle(True)
     try:
         active_yaw = float(yaw_offset)
-        # 1. Coarse aim towards the sign face with +7.5° elevation to clear the stand
+        # 1. Coarse aim towards the sign face with +8.0° elevation to clear the stand
         aimed = None
         if ep_gimbal and frame_shape is not None and detection is not None:
             aimed = aim_gimbal_at_detection(ep_gimbal, detection, frame_shape,
                                             yaw_offset=active_yaw, aim_y_fraction=0.30,
-                                            lock_yaw=False, pitch_up_deg=7.5)
+                                            lock_yaw=False, pitch_up_deg=BLASTER_PITCH_UP_DEG)
         stop_and_settle(ep_chassis, False, settle_s=0.15)
 
         # 2. Closed-loop visual fine centering: read a fresh frame and eliminate residual pixel offset
-        fine_pitch = aimed[0] if aimed else 7.5
+        fine_pitch = aimed[0] if aimed else BLASTER_PITCH_UP_DEG
         fine_yaw = aimed[1] if aimed else active_yaw
         if ep_gimbal and camera_reader is not None and aimed is not None:
             try:

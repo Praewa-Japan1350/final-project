@@ -35,6 +35,8 @@ COLOR_SCAN_HOLD_S = 0.35 # Briefly settle each gimbal view before fresh-frame vo
 TOF_ID = 1 
 # Blaster bullet type: "water" = กระสุนเจล (Gel Beads), "ir" = กระสุนอินฟราเรด (Infrared)
 BLASTER_FIRE_TYPE = "water" 
+# Blaster barrel elevation offset (+8.0°) to compensate for barrel below camera lens and hit sign center
+BLASTER_PITCH_UP_DEG = 8.0
 # Sensor-adaptor digital output level for the installed IR obstacle modules.
 IR_ACTIVE_LEVEL = 0  
 IR_EVADE_SPEED_MPS = 0.10 
