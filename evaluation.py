@@ -73,10 +73,24 @@ def evaluate_map_accuracy(gt_h_walls=None, gt_v_walls=None):
 
 def save_outputs(round_name=None, generate_plot=True):
     """Save trajectory CSV, walls CSV, signs CSV, and optionally high-res SLAM plot."""
+    norm_round = str(round_name).lower() if round_name else ""
+    is_r1 = "round1" in norm_round or "slam" in norm_round or "mapping" in norm_round
+    is_r2 = "round2" in norm_round or "target" in norm_round or "a_star" in norm_round or "a*" in norm_round
+
+    if is_r1:
+        round_key = "round1"
+        round_desc = "ROUND 1 · SLAM EXPLORATION & MAZE MAPPING"
+    elif is_r2:
+        round_key = "round2"
+        round_desc = "ROUND 2 · A* TARGET ENGAGEMENT & HOMING"
+    else:
+        round_key = norm_round if norm_round else "full"
+        round_desc = "MAZE RECONSTRUCTION & TARGET LOCALIZATION"
+
     log_file = os.path.join(OUTPUT_DIR, "exploration_log.csv")
     walls_file = os.path.join(OUTPUT_DIR, "wall_data.csv")
     signs_file = os.path.join(OUTPUT_DIR, "signs_data.csv")
-    img_name = f"robot_trajectory_{round_name}.png" if round_name else "robot_trajectory.png"
+    img_name = f"robot_trajectory_{round_key}.png" if round_key != "full" else "robot_trajectory.png"
     img_file = os.path.join(OUTPUT_DIR, img_name)
     traj_file = os.path.join(OUTPUT_DIR, "trajectory_log.csv")
     visited_file = os.path.join(OUTPUT_DIR, "visited_cells.csv")
@@ -92,6 +106,14 @@ def save_outputs(round_name=None, generate_plot=True):
         writer = csv.DictWriter(file, fieldnames=fields)
         writer.writeheader()
         writer.writerows([{key: item[key] for key in fields} for item in state.trajectory])
+
+    # Save dedicated per-round trajectory CSV
+    if is_r1 or is_r2:
+        round_traj_file = os.path.join(OUTPUT_DIR, f"trajectory_log_{round_key}.csv")
+        with open(round_traj_file, "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows([{key: item[key] for key in fields} for item in state.trajectory])
 
     with open(visited_file, "w", newline="", encoding="utf-8") as file:
         w = csv.writer(file)
@@ -325,8 +347,8 @@ def save_outputs(round_name=None, generate_plot=True):
 
         fig.text(0.5, 0.965, "ROBOMASTER AUTONOMOUS SLAM",
                  ha="center", va="top", color="#0f172a", fontsize=14, fontweight="bold")
-        fig.text(0.5, 0.940, "MAZE RECONSTRUCTION & TARGET LOCALIZATION",
-                 ha="center", va="top", color="#2563eb", fontsize=8, fontweight="bold", alpha=0.9)
+        fig.text(0.5, 0.940, round_desc,
+                 ha="center", va="top", color="#2563eb", fontsize=8.5, fontweight="bold", alpha=0.9)
 
         stats_str = f"EXPLORED: {len(state.visited_cells)}/{config.GRID_W * config.GRID_H} CELLS   |   WALLS: {total_walls}   |   TARGETS: {total_signs}   |   STEPS: {total_steps}   |   STATUS: COMPLETED"
         fig.text(0.5, 0.912, stats_str,
@@ -341,6 +363,14 @@ def save_outputs(round_name=None, generate_plot=True):
             Line2D([0], [0], marker="o", color="w", markerfacecolor=start_col, markersize=6.5, label="Start Position"),
             Line2D([0], [0], marker="D", color="w", markerfacecolor=end_col, markersize=6.5, label="End Position"),
         ]
+        has_hostage = any(s.get("is_hostage") or s.get("shape") == "hostage"
+                          for signs in state.detected_signs.values() for s in signs)
+        if has_hostage:
+            legend_elements.append(
+                Line2D([0], [0], marker="*", color="w", markerfacecolor="#f59e0b",
+                       markeredgecolor="#dc2626", markersize=9.0, label="Hostage (ตัวประกัน ⭐)")
+            )
+
         legend = ax.legend(
             handles=legend_elements,
             loc="lower center",
@@ -362,18 +392,27 @@ def save_outputs(round_name=None, generate_plot=True):
                  ha="center", va="bottom", color="#64748b", fontsize=7.2, fontweight="medium")
 
         fig.subplots_adjust(top=0.810, bottom=0.075, left=0.12, right=0.94)
-        fig.savefig(img_file, dpi=300, facecolor=fig_bg)
 
-        # Save copies to results/ directory and repository root
         code_dir = os.path.dirname(os.path.abspath(__file__))
         results_dir = os.path.join(code_dir, "results")
         os.makedirs(results_dir, exist_ok=True)
-        fig.savefig(os.path.join(results_dir, "final_slam_map.png"), dpi=300, facecolor=fig_bg)
-        fig.savefig(os.path.join(code_dir, "final_slam_map.png"), dpi=300, facecolor=fig_bg)
+
+        # Collect all image names to save
+        target_img_names = ["robot_trajectory.png", "final_slam_map.png"]
+        if is_r1:
+            target_img_names.append("robot_trajectory_round1.png")
+        elif is_r2:
+            target_img_names.append("robot_trajectory_round2.png")
+        elif round_key and round_key != "full":
+            target_img_names.append(f"robot_trajectory_{round_key}.png")
+
+        for iname in set(target_img_names):
+            fig.savefig(os.path.join(results_dir, iname), dpi=300, facecolor=fig_bg)
+            fig.savefig(os.path.join(code_dir, iname), dpi=300, facecolor=fig_bg)
         plt.close(fig)
 
         import shutil
-        for fname in ["exploration_log.csv", "trajectory_log.csv", "visited_cells.csv", "walls_data.csv", "signs_data.csv"]:
+        for fname in ["exploration_log.csv", "trajectory_log.csv", "visited_cells.csv", "wall_data.csv", "signs_data.csv"]:
             src = os.path.join(OUTPUT_DIR, fname)
             if os.path.exists(src):
                 dst_results = os.path.join(results_dir, fname)
@@ -383,8 +422,8 @@ def save_outputs(round_name=None, generate_plot=True):
                 if os.path.abspath(src) != os.path.abspath(dst_code):
                     shutil.copy2(src, dst_code)
 
-        print(f"บันทึกไฟล์ผลลัพธ์ทั้งหมดไว้ที่: {results_dir}")
-        print("-> exploration_log.csv, trajectory_log.csv, visited_cells.csv, walls_data.csv, signs_data.csv, final_slam_map.png เรียบร้อยแล้ว")
+        saved_list = ", ".join(sorted(set(target_img_names)))
+        print(f"บันทึกไฟล์ภาพแผนที่ผลลัพธ์: {saved_list} ไว้ที่: {results_dir}")
     except Exception as e:
         print(f"ไม่สามารถบันทึกรูปภาพได้: {e}")
 
@@ -393,13 +432,15 @@ def re_evaluate_from_saved():
     """
     โหลดข้อมูลแนวกำแพงและประวัติการเดินจากไฟล์ CSV ที่บันทึกไว้
     นำมาคำนวณ Map Accuracy เทียบกับ Ground Truth ใน config.py อีกครั้ง
-    โดยไม่ต้องนำหุ่นไปวิ่งใหม่
+    และสร้างภาพแผนที่การเดินรอบ 1 (robot_trajectory_round1.png) ทันที
     """
     import config
     import importlib
     importlib.reload(config)
 
-    walls_file = os.path.join(OUTPUT_DIR, "walls_data.csv")
+    walls_file = os.path.join(OUTPUT_DIR, "wall_data.csv")
+    if not os.path.exists(walls_file):
+        walls_file = os.path.join(OUTPUT_DIR, "walls_data.csv")
     log_file = os.path.join(OUTPUT_DIR, "exploration_log.csv")
 
     if not os.path.exists(walls_file) or not os.path.exists(log_file):
@@ -447,6 +488,31 @@ def re_evaluate_from_saved():
             })
             prev_cell = cell
 
+    # 3. โหลดเป้าหมายและตัวประกันจาก signs_data.csv หรือ maps/mission_map.json
+    signs_file = os.path.join(OUTPUT_DIR, "signs_data.csv")
+    if os.path.exists(signs_file):
+        try:
+            with open(signs_file, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    cell = (int(row["grid_x"]), int(row["grid_y"]))
+                    direction = row["direction"]
+                    shape = row["shape"]
+                    is_hostage = shape == "hostage" or "hostage" in row.get("shape_label", "").lower()
+                    sign_obj = {
+                        "color": row["color"],
+                        "shape": shape,
+                        "is_hostage": is_hostage,
+                        "area": float(row.get("area_px", 0)),
+                        "image_path": row.get("image_path", ""),
+                    }
+                    key = (cell, direction)
+                    if key not in state.detected_signs:
+                        state.detected_signs[key] = []
+                    state.detected_signs[key].append(sign_obj)
+        except Exception:
+            pass
+
     total_walls = len(state.detected_h_walls) + len(state.detected_v_walls)
     total_signs = sum(len(s) for s in state.detected_signs.values())
     print("\n=======================================================")
@@ -457,8 +523,8 @@ def re_evaluate_from_saved():
     print(f"• เป้าที่ตรวจพบ: {total_signs} เป้า")
     print("=======================================================\n")
 
-    save_outputs()
-    print("✅ อัปเดต robot_trajectory.png เรียบร้อยแล้ว!")
+    save_outputs("round1")
+    print("✅ บันทึก robot_trajectory_round1.png และ robot_trajectory.png เรียบร้อยแล้ว!")
 
 
 if __name__ == "__main__":

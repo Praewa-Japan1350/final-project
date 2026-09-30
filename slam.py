@@ -108,9 +108,10 @@ def clean_old_results():
 
     # 3. Clear root-level result images and leftover CSVs if any
     code_dir = os.path.dirname(os.path.abspath(__file__))
-    for fname in ("final_slam_map.png", "robot_trajectory.png", "slam_map.png",
-                  "exploration_log.csv", "signs_data.csv", "trajectory_log.csv",
-                  "visited_cells.csv", "walls_data.csv"):
+    for fname in ("final_slam_map.png", "robot_trajectory.png", "robot_trajectory_round1.png",
+                  "robot_trajectory_round2.png", "slam_map.png", "exploration_log.csv",
+                  "signs_data.csv", "trajectory_log.csv", "trajectory_log_round1.csv",
+                  "trajectory_log_round2.csv", "visited_cells.csv", "wall_data.csv"):
         p = os.path.join(code_dir, fname)
         if os.path.exists(p):
             try:
@@ -783,7 +784,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             dashboard.log(f"• ระยะทางเดินทั้งหมด: {len(state.trajectory) * config.GRID_SIZE_M:.2f} เมตร ({len(state.trajectory)} ก้าว)")
             dashboard.log("• บันทึกไฟล์ผลลัพธ์  : โฟลเดอร์ results/ และ final_slam_map.png")
             dashboard.log("=" * 60)
-            dashboard.show_final_map_window()
+            dashboard.show_final_map_window(round_label)
 
     except KeyboardInterrupt:
         print("\n⚠️ ผู้ใช้กดหยุดฉุกเฉิน (KeyboardInterrupt / Ctrl+C)")

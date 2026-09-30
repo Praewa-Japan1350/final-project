@@ -524,7 +524,7 @@ class Dashboard:
         self.btn_open_folder.pack(side=tk.RIGHT, padx=(3, 0))
 
         self.btn_map_view = tk.Button(
-            results_toolbar, text="🗺️ แผนที่สรุป", command=self.show_final_map_window,
+            results_toolbar, text="🗺️ แผนที่รอบ 1 & 2", command=self.show_final_map_window,
             bg="#059669", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT,
             padx=6, pady=3, cursor="hand2"
         )
@@ -1384,41 +1384,101 @@ class Dashboard:
         except Exception as e:
             self.log(f"ไม่สามารถเปิดโฟลเดอร์ results ได้: {e}")
 
-    def show_final_map_window(self):
-        """Display the generated final SLAM map in a high-res pop-up window."""
+    def show_final_map_window(self, initial_tab=None):
+        """Display the generated SLAM trajectory map in a high-res pop-up window with Round 1 & Round 2 switching."""
         import os
         code_dir = os.path.dirname(os.path.abspath(__file__))
-        possible_paths = [
-            os.path.join(code_dir, "results", "final_slam_map.png"),
-            os.path.join(code_dir, "final_slam_map.png"),
-            os.path.join(code_dir, "robot_trajectory.png"),
-            os.path.join(os.path.dirname(code_dir), "robot_trajectory.png"),
-        ]
-        map_path = None
-        for p in possible_paths:
-            if os.path.exists(p):
-                map_path = p
-                break
+        results_dir = os.path.join(code_dir, "results")
 
-        if not map_path:
+        map_files = {
+            "round1": [
+                os.path.join(results_dir, "robot_trajectory_round1.png"),
+                os.path.join(code_dir, "robot_trajectory_round1.png"),
+            ],
+            "round2": [
+                os.path.join(results_dir, "robot_trajectory_round2.png"),
+                os.path.join(code_dir, "robot_trajectory_round2.png"),
+            ],
+            "overview": [
+                os.path.join(results_dir, "robot_trajectory.png"),
+                os.path.join(code_dir, "robot_trajectory.png"),
+                os.path.join(results_dir, "final_slam_map.png"),
+                os.path.join(code_dir, "final_slam_map.png"),
+            ],
+        }
+
+        def _find_path(key):
+            for p in map_files.get(key, []):
+                if os.path.exists(p):
+                    return p
+            return None
+
+        has_r1 = bool(_find_path("round1"))
+        has_r2 = bool(_find_path("round2"))
+        has_any = has_r1 or has_r2 or bool(_find_path("overview"))
+
+        if not has_any:
             self.log("⚠️ ยังไม่มีภาพแผนที่ผลลัพธ์ (จะถูกสร้างเมื่อสำรวจเสร็จสิ้น)")
             return
 
         map_win = tk.Toplevel(self.root)
-        map_win.title("RoboMaster SLAM · Final Map Result")
-        map_win.geometry("820x960")
+        map_win.title("RoboMaster SLAM · Trajectory Map (Round 1 & Round 2)")
+        map_win.geometry("860x980")
         map_win.configure(bg="#f8fafc")
 
-        try:
-            img = Image.open(map_path)
-            img.thumbnail((780, 900), Image.Resampling.LANCZOS)
-            photo = ImageTk.PhotoImage(img)
-            lbl = tk.Label(map_win, image=photo, bg="#f8fafc")
-            lbl.image = photo
-            lbl.pack(fill=tk.BOTH, expand=True, padx=12, pady=12)
-            self.log(f"🗺️ แสดงแผนที่ผลลัพธ์: {os.path.basename(map_path)}")
-        except Exception as e:
-            tk.Label(map_win, text=f"Error loading map: {e}", bg="#f8fafc", fg="red").pack(padx=20, pady=20)
+        top_bar = tk.Frame(map_win, bg="#ffffff", padx=12, pady=8, highlightbackground="#cbd5e1", highlightthickness=1)
+        top_bar.pack(fill=tk.X)
+
+        lbl_title = tk.Label(top_bar, text="🗺️ แผนที่เส้นทางการเดิน:", bg="#ffffff", fg="#0f172a", font=("Segoe UI", 10, "bold"))
+        lbl_title.pack(side=tk.LEFT, padx=(0, 10))
+
+        content_frame = tk.Frame(map_win, bg="#f8fafc")
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        lbl_img = tk.Label(content_frame, bg="#f8fafc")
+        lbl_img.pack(fill=tk.BOTH, expand=True)
+
+        map_win._photo = None
+
+        def _load_and_display(key):
+            target_path = _find_path(key)
+            if not target_path:
+                lbl_img.config(image="", text=f"ยังไม่มีข้อมูลภาพแผนที่สำหรับ {key.upper()}\n(ไฟล์จะถูกบันทึกอัตโนมัติเมื่อสิ้นสุดรอบ {key})", fg="#64748b", font=("Segoe UI", 11))
+                return
+            try:
+                img = Image.open(target_path)
+                img.thumbnail((820, 880), Image.Resampling.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+                map_win._photo = photo
+                lbl_img.config(image=photo, text="")
+                self.log(f"🗺️ แสดงแผนที่: {os.path.basename(target_path)}")
+            except Exception as err:
+                lbl_img.config(text=f"Error loading map: {err}", fg="red")
+
+        btn_r1 = tk.Button(top_bar, text="🗺️ รอบ 1: สำรวจ SLAM", command=lambda: _load_and_display("round1"),
+                           bg="#059669" if has_r1 else "#94a3b8", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=8, pady=3, cursor="hand2")
+        btn_r1.pack(side=tk.LEFT, padx=4)
+
+        btn_r2 = tk.Button(top_bar, text="⭐ รอบ 2: ยิงเป้าหมาย A*", command=lambda: _load_and_display("round2"),
+                           bg="#2563eb" if has_r2 else "#94a3b8", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=8, pady=3, cursor="hand2")
+        btn_r2.pack(side=tk.LEFT, padx=4)
+
+        btn_all = tk.Button(top_bar, text="🌐 แผนที่รวมล่าสุด", command=lambda: _load_and_display("overview"),
+                            bg="#475569", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=8, pady=3, cursor="hand2")
+        btn_all.pack(side=tk.LEFT, padx=4)
+
+        tk.Button(top_bar, text="📁 Results Folder", command=self.open_results_folder,
+                  bg="#64748b", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=8, pady=3, cursor="hand2").pack(side=tk.RIGHT)
+
+        # Select initial view
+        if initial_tab and _find_path(initial_tab):
+            _load_and_display(initial_tab)
+        elif has_r1:
+            _load_and_display("round1")
+        elif has_r2:
+            _load_and_display("round2")
+        else:
+            _load_and_display("overview")
 
     def show_target_gallery(self):
         """Open a dedicated pop-up gallery showing all detected and fired target snapshots."""
