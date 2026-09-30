@@ -476,7 +476,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
         step = 0
         round_started = time.monotonic()
         is_mapping_round = run_mode in ("mapping", "slam_only", "slam")
-        round_limit_s = 600 if is_mapping_round else 300
+        round_limit_s = getattr(config, "ROUND1_LIMIT_S", 900) if is_mapping_round else getattr(config, "ROUND2_LIMIT_S", 600)
         round_label = "round1" if is_mapping_round else "round2"
 
         # Ensure timer is active on dashboard if not already started by GUI button
@@ -527,26 +527,43 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             )
             if time.monotonic() >= round_started + round_limit_s:
                 state.stop_requested = True
+
+        # ติดตามช่องที่เคยสแกนหาเป้าหมายไปแล้ว เพื่อไม่ให้เสียเวลาสแกนซ้ำเมื่อเดินผ่าน
+        scanned_target_cells = set()
+
         while (not state.stop_requested and is_mapping_round
                and time.monotonic() - round_started < round_limit_s):
-            # Stop and let chassis motion settle before every gimbal scan,
-            # including when revisiting an already explored cell.
-            stop_and_settle(ep_chassis, sim_mode, settle_s=0.25)
+            # Stop and let chassis motion settle before every gimbal scan
+            stop_and_settle(ep_chassis, sim_mode, settle_s=0.18)
             align_heading(ep_chassis, heading, sim_mode)
             if state.stop_requested:
                 break
 
+            is_already_visited = position in scanned_target_cells
+            scanned_target_cells.add(position)
+
             if dashboard:
                 dashboard.log(f"📍 [STEP {step}] หุ่นยนต์อยู่ที่ ({position[0]},{position[1]}) ทิศ {heading} | สำรวจแล้ว {len(state.visited_cells)}/{config.GRID_W*config.GRID_H} ช่อง ({len(state.visited_cells)/(config.GRID_W*config.GRID_H)*100:.1f}%)")
-                dashboard.log(f"🔭 [SCAN START] เริ่มสแกน 3 ทิศทาง (หน้า, ขวา, ซ้าย) จากช่อง {position}")
 
-            readings = scan_45_degree_sweep(
-                ep_chassis, ep_gimbal, position, heading, sim_mode, dashboard, step,
-                camera_reader=camera_reader, color_filter=color_filter,
-                # Record every sign, and immediately engage only the colors and
-                # shapes selected by the operator before the mission starts.
-                shape_filter=shape_filter, blaster=ep_blaster, fire_enabled=True,
-            )
+            if is_already_visited:
+                # ตรงที่เดิน visit ไปแล้ว ไม่ต้องหาเป้าหมายซ้ำ! (Fast Backtrack Pass)
+                if dashboard:
+                    dashboard.log(f"⚡ [FAST PASS] ช่อง {position} เคยสำรวจแล้ว -> ไม่ต้องหาเป้าหมายซ้ำ (เดินผ่านเร็ว)")
+                readings = scan_45_degree_sweep(
+                    ep_chassis, ep_gimbal, position, heading, sim_mode, dashboard, step,
+                    camera_reader=None, color_filter=None, shape_filter=None,
+                    blaster=None, fire_enabled=False, search_targets=False,
+                )
+            else:
+                if dashboard:
+                    dashboard.log(f"🔭 [SCAN START] เริ่มสแกน 3 ทิศทาง (หน้า, ขวา, ซ้าย) จากช่อง {position}")
+                readings = scan_45_degree_sweep(
+                    ep_chassis, ep_gimbal, position, heading, sim_mode, dashboard, step,
+                    camera_reader=camera_reader, color_filter=color_filter,
+                    shape_filter=shape_filter, blaster=ep_blaster, fire_enabled=True,
+                    search_targets=True,
+                )
+
             state.visited_cells.add(position)
             if is_mapping_round:
                 _save_mission_map(start_config)
@@ -554,9 +571,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             if state.stop_requested:
                 break
 
-            # Walls and colors were sampled together while the gimbal faced
-            # each side. Recenter only after the complete four-side survey.
-            recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
+            # ปรับกึ่งกลางเฉพาะช่องใหม่ เพื่อความรวดเร็วในการเคลื่อนที่
+            if not is_already_visited:
+                recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
             if state.stop_requested:
                 break
 

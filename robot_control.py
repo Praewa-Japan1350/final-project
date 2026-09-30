@@ -706,7 +706,8 @@ def aim_verify_and_fire(ep_chassis, ep_gimbal, ep_blaster, camera_reader, detect
 
 def scan_sides_and_front(ep_chassis, ep_gimbal, position, current_heading, sim_mode,
                          dashboard, step, camera_reader=None, color_filter=None,
-                         shape_filter=None, blaster=None, fire_enabled=False):
+                         shape_filter=None, blaster=None, fire_enabled=False,
+                         search_targets=True):
     """
     Check walls and targets: Front (0°), Right (+90°), Left (-90°).
     Back (180°) is completely skipped (no color scan, no false targets from behind).
@@ -767,7 +768,7 @@ def scan_sides_and_front(ep_chassis, ep_gimbal, position, current_heading, sim_m
                 dashboard.log(f"   ↳ [{dir_name} {dir_heading}] เป็นทางเปิดโล่ง -> ข้ามการสแกนป้ายสี (ตัดสัญญาณกวนภายนอก)")
             continue
 
-        if sim_mode or not camera_reader or not ep_gimbal:
+        if not search_targets or sim_mode or not camera_reader or not ep_gimbal:
             continue
 
         if not ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=yaw_angle,

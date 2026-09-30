@@ -25,10 +25,12 @@ GRID_SIZE_M = 0.60
 # Assignment rule: a target may be engaged only when it is at most two tiles
 # away. Keep this derived from the configured grid pitch.
 MAX_TARGET_RANGE_MM = int(2 * GRID_SIZE_M * 1000)
-SPEED = 0.30            # Smooth forward velocity speed (m/s)
-ROT_SPEED = 50          # Precise turning speed (deg/s) - retains 90° precision
-RECENTER_SPEED = 0.25  # Smooth strafe recentering (m/s)
+SPEED = 0.42            # Smooth forward velocity speed (m/s) - increased for faster coverage
+ROT_SPEED = 65          # Precise turning speed (deg/s) - faster 90° rotations
+RECENTER_SPEED = 0.28   # Smooth strafe recentering (m/s)
 GIMBAL_SPEED = 280      # Fast & smooth gimbal yaw speed (deg/s)
+ROUND1_LIMIT_S = 900    # Round 1 (SLAM) time limit in seconds (15 minutes)
+ROUND2_LIMIT_S = 600    # Round 2 (A*) time limit in seconds (10 minutes)
 COLOR_SCAN_HOLD_S = 0.35 # Briefly settle each gimbal view before fresh-frame voting
 TOF_ID = 1
 # Blaster bullet type: "water" = กระสุนเจล (Gel Beads), "ir" = กระสุนอินฟราเรด (Infrared)
