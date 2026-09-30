@@ -32,12 +32,12 @@ GIMBAL_SPEED = 280      # Fast & smooth gimbal yaw speed (deg/s)
 ROUND1_LIMIT_S = 900    # Round 1 (SLAM) time limit in seconds (15 minutes)
 ROUND2_LIMIT_S = 600    # Round 2 (A*) time limit in seconds (10 minutes)
 COLOR_SCAN_HOLD_S = 0.35 # Briefly settle each gimbal view before fresh-frame voting
-TOF_ID = 1
+TOF_ID = 1 
 # Blaster bullet type: "water" = กระสุนเจล (Gel Beads), "ir" = กระสุนอินฟราเรด (Infrared)
-BLASTER_FIRE_TYPE = "water"
+BLASTER_FIRE_TYPE = "water" 
 # Sensor-adaptor digital output level for the installed IR obstacle modules.
-IR_ACTIVE_LEVEL = 0
-IR_EVADE_SPEED_MPS = 0.10
+IR_ACTIVE_LEVEL = 0  
+IR_EVADE_SPEED_MPS = 0.10 
 IR_EVADE_ACCEL_MPS2 = 0.30
 WALL_THRESHOLD_MM = 550 # Distance <= 550mm indicates a foam wall on immediate cell border (open passages >= 700mm)
 RECENTER_WALL_MAX_MM = 400 # Use walls within 40cm for recentering

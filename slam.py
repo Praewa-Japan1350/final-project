@@ -186,7 +186,9 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
     for (cell, direction), signs in state.detected_signs.items():
         selected = [sign for sign in signs
                     if (not color_filter or sign["color"] in color_filter)
-                    and (not shape_filter or sign["shape"] in shape_filter)]
+                    and (not shape_filter or sign["shape"] in shape_filter)
+                    and not sign.get("is_hostage")
+                    and sign.get("shape") != "hostage"]
         unique = []
         for sign in selected:
             key = (tuple(cell), sign["color"], sign["shape"])
@@ -296,8 +298,13 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
         elif confirmed_pairs:
             if not sim_mode and ep_blaster is not None:
                 for color, shape in sorted(confirmed_pairs):
+                    if shape == "hostage":
+                        if dashboard:
+                            dashboard.log("⚠️ [SAFETY] ข้ามเป้าหมาย: ตรวจพบตัวประกัน (Hostage) ห้ามยิงเด็ดขาด!")
+                        continue
                     matching = [item for item in observed
-                                if item["color"] == color and item["shape"] == shape]
+                                if item["color"] == color and item["shape"] == shape
+                                and not item.get("is_hostage") and item.get("shape") != "hostage"]
                     if not matching or observed_view is None:
                         continue
                     candidate = min(

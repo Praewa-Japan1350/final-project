@@ -1351,15 +1351,27 @@ class Dashboard:
             fired = metadata.get("fired", False)
             area = metadata.get("area", 0)
             time_str = metadata.get("time", "")
-            status_desc = "💥 ยิง 2x เจล เข้าเป้าแล้ว" if fired else "🔍 ตรวจพบ (ยังไม่ยิง)"
-
-            info_text = (
-                f"เป้าหมาย: {color} {shape} ({area} px)\n"
-                f"พิกัด: ({cell[0]},{cell[1]}) ด้าน {direction}\n"
-                f"สถานะ: {status_desc}\n"
-                f"เวลา: {time_str}  |  ไฟล์: {os.path.basename(filepath)}"
-            )
-            self.target_info_label.config(text=info_text)
+            is_hostage = bool(metadata.get("is_hostage") or shape == "HOSTAGE")
+            if is_hostage:
+                status_desc = "⚠️ ตัวประกัน (ลูกไก่) - ห้ามยิงเด็ดขาด!"
+                info_text = (
+                    f"🚨 วัตถุ: ตัวประกัน (ลูกไก่ / HOSTAGE)\n"
+                    f"พิกัด: ({cell[0]},{cell[1]}) ด้าน {direction}\n"
+                    f"สถานะ: {status_desc}\n"
+                    f"เวลา: {time_str}  |  ไฟล์: {os.path.basename(filepath)}"
+                )
+                self.target_info_label.config(text=info_text, fg="#b45309")
+                self.target_card.config(text=" ⚠️ ตรวจพบตัวประกัน (Hostage Detected - DO NOT SHOOT) ", fg="#b45309")
+            else:
+                status_desc = "💥 ยิง 2x เจล เข้าเป้าแล้ว" if fired else "🔍 ตรวจพบ (ยังไม่ยิง)"
+                info_text = (
+                    f"เป้าหมาย: {color} {shape} ({area} px)\n"
+                    f"พิกัด: ({cell[0]},{cell[1]}) ด้าน {direction}\n"
+                    f"สถานะ: {status_desc}\n"
+                    f"เวลา: {time_str}  |  ไฟล์: {os.path.basename(filepath)}"
+                )
+                self.target_info_label.config(text=info_text, fg="#1e293b")
+                self.target_card.config(text=" 🎯 ผลลัพธ์ภาพเป้าหมายล่าสุด (Latest Target Snapshot) ", fg="#0f172a")
         self._post_ui(_apply)
 
     def open_results_folder(self):
@@ -1491,10 +1503,21 @@ class Dashboard:
             fired = item.get("fired", True)
             t_str = item.get("time", "")
 
-            badge_text = "💥 ยิงเข้าเป้า (FIRED HIT)" if fired else "🔍 ตรวจพบ (DETECTED)"
-            badge_fg = "#059669" if fired else "#d97706"
+            is_hostage = bool(item.get("is_hostage") or shape == "HOSTAGE" or "hostage" in os.path.basename(fp).lower())
+            if is_hostage:
+                badge_text = "⚠️ ตัวประกัน (ลูกไก่) - ห้ามยิงเด็ดขาด (HOSTAGE SAFE)"
+                badge_fg = "#d97706"
+                target_title = f"ตัวประกัน #{len(targets_to_show) - idx}: ลูกไก่ (HOSTAGE)"
+            elif fired:
+                badge_text = "💥 ยิงเข้าเป้า (FIRED HIT)"
+                badge_fg = "#059669"
+                target_title = f"เป้าหมาย #{len(targets_to_show) - idx}: {color} {shape}"
+            else:
+                badge_text = "🔍 ตรวจพบ (DETECTED)"
+                badge_fg = "#d97706"
+                target_title = f"เป้าหมาย #{len(targets_to_show) - idx}: {color} {shape}"
 
-            tk.Label(card, text=f"เป้าหมาย #{len(targets_to_show) - idx}: {color} {shape}",
+            tk.Label(card, text=target_title,
                      bg="#ffffff", fg="#0f172a", font=("Segoe UI", 11, "bold")).pack(anchor="w")
             tk.Label(card, text=f"สถานะ: {badge_text}", bg="#ffffff", fg=badge_fg,
                      font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(2, 0))

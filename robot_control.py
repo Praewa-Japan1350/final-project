@@ -625,6 +625,11 @@ def aim_verify_and_fire(ep_chassis, ep_gimbal, ep_blaster, camera_reader, detect
     # Strict validation: ONLY fire at valid detected targets with recognized color and shape
     if not color or not shape or shape not in SHAPES or color not in COLORS:
         return 0
+    # STRICT SAFETY RULE: NEVER FIRE AT HOSTAGE (ตัวประกัน)!
+    if shape == "hostage" or (detection and detection.get("is_hostage")):
+        if dashboard:
+            dashboard.log("⚠️ [BLASTER SAFETY] ปฏิเสธการยิง: ตรวจพบตัวประกัน (Hostage) ห้ามยิงเด็ดขาด!")
+        return 0
     if sim_mode or not all((ep_chassis, ep_gimbal, ep_blaster)):
         return 0
     if dashboard:
@@ -813,20 +818,34 @@ def scan_sides_and_front(ep_chassis, ep_gimbal, position, current_heading, sim_m
 
         if dashboard:
             if detected:
-                labels = [f"{it['color'].upper()} {it['shape'].upper()}" for it in detected]
-                dashboard.log(f"🎯 [TARGET DETECTED] {dir_name} ({dir_heading}): พบ {len(detected)} เป้าหมาย -> {', '.join(labels)}")
+                labels = []
+                for it in detected:
+                    if it.get("is_hostage") or it.get("shape") == "hostage":
+                        labels.append("⚠️ HOSTAGE (ตัวประกัน)")
+                    else:
+                        labels.append(f"{it['color'].upper()} {it['shape'].upper()}")
+                dashboard.log(f"🎯 [TARGET DETECTED] {dir_name} ({dir_heading}): พบ {len(detected)} วัตถุ -> {', '.join(labels)}")
+                for it in detected:
+                    if it.get("is_hostage") or it.get("shape") == "hostage":
+                        dashboard.log(f"⚠️ [HOSTAGE DETECTED] ด้าน {dir_name} ({dir_heading}): ตรวจพบตัวประกัน (ลูกไก่) -> บันทึกตำแหน่งและห้ามยิงเด็ดขาด! (Safe)")
             else:
                 dashboard.log(f"   ↳ [{dir_name} {dir_heading}] ไม่พบเป้าหมายบนกำแพง")
 
-        # C. FIRE at target signs in this direction
+        # C. FIRE at target signs in this direction (STRICT HOSTAGE SAFETY EXCLUSION)
         if fire_enabled and blaster is not None and detected and not sim_mode:
             allowed_colors = set(color_filter) if color_filter else set(COLORS)
             allowed_shapes = set(shape_filter) if shape_filter else set(SHAPES)
             selected = [item for item in detected
                         if item.get("color") in allowed_colors
                         and item.get("shape") in allowed_shapes
-                        and item.get("shape") is not None]
+                        and item.get("shape") is not None
+                        and not item.get("is_hostage")
+                        and item.get("shape") != "hostage"]
             for item in selected:
+                if item.get("is_hostage") or item.get("shape") == "hostage":
+                    if dashboard:
+                        dashboard.log("⚠️ [SAFETY] ข้ามการยิง: วัตถุคือตัวประกัน (Hostage) ห้ามยิงเด็ดขาด!")
+                    continue
                 key = _fired_key(position, item["color"], item["shape"])
                 if key in state.fired_targets:
                     continue
@@ -977,7 +996,8 @@ def scan_4_directions(ep_chassis, ep_gimbal, position, current_heading, sim_mode
             allowed_colors = set(COLORS) if color_filter is None else set(color_filter)
             allowed_shapes = set(SHAPES) if shape_filter is None else set(shape_filter)
             fire_candidates = [item for item in detected_signs
-                               if item["color"] in allowed_colors and item["shape"] in allowed_shapes]
+                               if item["color"] in allowed_colors and item["shape"] in allowed_shapes
+                               and not item.get("is_hostage") and item.get("shape") != "hostage"]
             if fire_enabled and blaster is not None and fire_candidates and not sim_mode:
                 # Fire once per selected color/shape at this mapped viewing side,
                 # even if exploration later revisits the same cell.

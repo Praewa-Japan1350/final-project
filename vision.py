@@ -52,6 +52,7 @@ SHAPES = {
     "square": "จัตุรัส",
     "horizontal": "ผืนผ้าแนวนอน",
     "vertical": "ผืนผ้าแนวตั้ง",
+    "hostage": "ตัวประกัน (ห้ามยิง)",
 }
 
 # Camera framing controls: these are fractions of the original frame.
@@ -158,6 +159,48 @@ def _shape_for_contour(contour):
     return None
 
 
+def is_chick_hostage(view, bbox, color, shape):
+    """
+    ตรวจสอบตัวประกัน (ลูกไก่ / Yellow Chick Hostage) ที่ห้ามยิงเด็ดขาด:
+    - สีเหลือง (Yellow)
+    - หากตรวจจับได้เป็น 'circle' (ทรงกลม/รีตามที่ผู้ใช้ระบุ: 'หากในตอนรันจริงจับได้สีเหลืองวงกลมแล้วกล้องไปจับลูกไก่ได้ก็ห้ามยิงให้ detect เป็นตัวประกันไว้เท่านั้น')
+    - หรือวัตถุสีเหลืองที่วางอยู่ระดับพื้นด้านล่าง (Floor level: (y+h)/H >= 0.75) พร้อมเท้าสีส้ม (Orange feet)
+    - ไม่ใช่แผ่นป้ายสี่เหลี่ยมผืนผ้าแนวนอน ('horizontal') บนกำแพง
+    """
+    if color != "yellow":
+        return False
+    # ป้ายสีเหลืองแนวนอนบนกำแพง ไม่ใช่ลูกไก่
+    if shape == "horizontal":
+        return False
+
+    h, w = view.shape[:2]
+    bx, by, bw, bh = bbox
+    bottom_ratio = (by + bh) / float(h)
+    aspect_ratio = bw / float(bh) if bh > 0 else 1.0
+
+    # 1. ข้อกำหนดจากผู้ใช้: สีเหลืองวงกลม คือตัวประกัน (ลูกไก่)
+    if shape == "circle":
+        return True
+
+    # 2. ตรวจสอบเท้าสีส้มใต้ตัวลูกไก่ (Orange feet HSV)
+    feet_y0 = max(0, by + int(bh * 0.65))
+    feet_y1 = min(h, by + bh + 45)
+    feet_x0 = max(0, bx - 15)
+    feet_x1 = min(w, bx + bw + 15)
+    feet_roi = view[feet_y0:feet_y1, feet_x0:feet_x1]
+    if feet_roi.size > 0:
+        feet_hsv = cv2.cvtColor(feet_roi, cv2.COLOR_BGR2HSV)
+        orange_mask = cv2.inRange(feet_hsv, np.array([5, 85, 70], dtype=np.uint8), np.array([19, 255, 255], dtype=np.uint8))
+        if cv2.countNonZero(orange_mask) > 35 and bottom_ratio >= 0.70:
+            return True
+
+    # 3. วัตถุสีเหลืองตั้งอยู่บนพื้นตรงฐานกำแพง (Floor base: bottom_ratio >= 0.80) ที่ไม่ใช่แนวนอน
+    if bottom_ratio >= 0.80 and aspect_ratio <= 1.25 and bh >= 80:
+        return True
+
+    return False
+
+
 def _box_iou(box_a, box_b):
     ax, ay, aw, ah = box_a
     bx, by, bw, bh = box_b
@@ -250,7 +293,7 @@ def _detect_signs_detailed(frame, color_filter=None, shape_filter=None):
             if area < MIN_AREA or area / max(1, mask.shape[0] * mask.shape[1]) > MAX_OBJECT_AREA_RATIO:
                 continue
             shape = _shape_for_contour(contour)
-            if shape is None or (shape_filter is not None and shape not in shape_filter):
+            if shape is None:
                 continue
             x, y, box_width, box_height = cv2.boundingRect(contour)
             if (box_width < MIN_OBJECT_DIMENSION_PX or box_height < MIN_OBJECT_DIMENSION_PX or
@@ -264,9 +307,15 @@ def _detect_signs_detailed(frame, color_filter=None, shape_filter=None):
             color_purity = color_pixels / component_pixels
             if color_purity < MIN_COLOR_PURITY:
                 continue
-            detections.append({"color": color_name, "shape": shape, "area": float(area),
-                "bbox": (x + roi_start, y + roi_top, box_width, box_height),
+            bbox_full = (x + roi_start, y + roi_top, box_width, box_height)
+            is_hostage = is_chick_hostage(view, bbox_full, color_name, shape)
+            final_shape = "hostage" if is_hostage else shape
+            if shape_filter is not None and final_shape not in shape_filter and shape not in shape_filter:
+                continue
+            detections.append({"color": color_name, "shape": final_shape, "area": float(area),
+                "bbox": bbox_full,
                 "size_px": (box_width, box_height),
+                "is_hostage": is_hostage,
                 "_color_purity": color_purity,
                 "_component": accepted_component})
 
@@ -438,10 +487,15 @@ class VisionFrameAnalyzer:
                           (int(width * far_edge) - 1, int(height * far_edge) - 1), 180, 2)
             for item in stable:
                 x, y, w, h = item["bbox"]
-                cfg = COLORS[item["color"]]
-                cv2.rectangle(view, (x, y), (x + w, y + h), cfg["bgr"], 2)
-                cv2.putText(view, f'{item["color"]} {item["shape"]} {w}x{h}px', (x, max(18, y - 7)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.55, cfg["bgr"], 2, cv2.LINE_AA)
+                if item.get("is_hostage") or item.get("shape") == "hostage":
+                    box_color = (0, 165, 255)
+                    label_str = f'⚠️ HOSTAGE (ตัวประกัน) {w}x{h}px'
+                else:
+                    box_color = COLORS.get(item["color"], {}).get("bgr", (0, 255, 0))
+                    label_str = f'{item["color"]} {item["shape"]} {w}x{h}px'
+                cv2.rectangle(view, (x, y), (x + w, y + h), box_color, 2)
+                cv2.putText(view, label_str, (x, max(18, y - 7)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.52, box_color, 2, cv2.LINE_AA)
             with self._lock:
                 if not self._enabled:
                     continue
@@ -576,11 +630,15 @@ def detect_stable_signs(frame_reader, dashboard=None, color_filter=None, shape_f
     if dashboard and last_view is not None:
         for item in stable:
             x, y, w, h = item["bbox"]
-            color = COLORS[item["color"]]["bgr"]
+            if item.get("is_hostage") or item.get("shape") == "hostage":
+                color = (0, 165, 255)
+                text = f'⚠️ HOSTAGE (ตัวประกัน) {item["votes"]}/{COLOR_VOTE_FRAME_COUNT}'
+            else:
+                color = COLORS.get(item["color"], {}).get("bgr", (0, 255, 0))
+                text = f'{item["color"]} {item["shape"]} {item["votes"]}/{COLOR_VOTE_FRAME_COUNT}'
             cv2.rectangle(last_view, (x, y), (x + w, y + h), color, 2)
-            cv2.putText(last_view, f'{item["color"]} {item["shape"]} {item["votes"]}/{COLOR_VOTE_FRAME_COUNT}',
-                        (x, max(18, y - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.55,
-                        color, 2, cv2.LINE_AA)
+            cv2.putText(last_view, text, (x, max(18, y - 6)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.52, color, 2, cv2.LINE_AA)
         dashboard.update_camera_frame(last_view)
     return stable, last_view, summary
 
@@ -605,7 +663,8 @@ def save_target_snapshot(frame, cell, direction, item, fired=False, pitch=None, 
     shape_name = str(item.get("shape", "unknown")).lower()
     x_cell, y_cell = cell
 
-    status_tag = "hit" if fired else "det"
+    is_hostage = bool(item.get("is_hostage") or shape_name == "hostage")
+    status_tag = "hostage" if is_hostage else ("hit" if fired else "det")
     filename = f"target_{x_cell}_{y_cell}_{direction}_{color_name}_{shape_name}_{status_tag}_{timestamp_str}.jpg"
     filepath = os.path.join(targets_dir, filename)
 
@@ -614,29 +673,40 @@ def save_target_snapshot(frame, cell, direction, item, fired=False, pitch=None, 
 
     # 1. Draw target bounding box
     bbox = item.get("bbox")
-    bgr = COLORS.get(color_name, {}).get("bgr", (0, 255, 0))
+    bgr = (0, 165, 255) if is_hostage else COLORS.get(color_name, {}).get("bgr", (0, 255, 0))
     if bbox:
         bx, by, bw, bh = bbox
         cv2.rectangle(annotated, (bx, by), (bx + bw, by + bh), bgr, 3)
-        # Center crosshair reticle
         cx, cy = int(bx + bw / 2), int(by + bh / 2)
-        cv2.drawMarker(annotated, (cx, cy), (0, 255, 255), cv2.MARKER_CROSS, 24, 2)
-        cv2.circle(annotated, (cx, cy), 14, (0, 255, 255), 1, cv2.LINE_AA)
+        if is_hostage:
+            cv2.circle(annotated, (cx, cy), 22, (0, 165, 255), 2, cv2.LINE_AA)
+            cv2.putText(annotated, "!", (cx - 5, cy + 8), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2, cv2.LINE_AA)
+        else:
+            cv2.drawMarker(annotated, (cx, cy), (0, 255, 255), cv2.MARKER_CROSS, 24, 2)
+            cv2.circle(annotated, (cx, cy), 14, (0, 255, 255), 1, cv2.LINE_AA)
 
     # 2. Draw Top Status Header Banner
     cv2.rectangle(annotated, (0, 0), (w, 44), (15, 23, 42), -1)
-    badge_title = "🎯 TARGET HIT · FIRED 2x GEL BEADS" if fired else "🔍 TARGET DETECTED"
-    badge_color = (16, 185, 129) if fired else (245, 158, 11)  # Emerald vs Amber
+    if is_hostage:
+        badge_title = "⚠️ HOSTAGE DETECTED · DO NOT FIRE (ตัวประกัน - ห้ามยิงเด็ดขาด!)"
+        badge_color = (0, 140, 255)
+    elif fired:
+        badge_title = "🎯 TARGET HIT · FIRED 2x GEL BEADS"
+        badge_color = (16, 185, 129)
+    else:
+        badge_title = "🔍 TARGET DETECTED"
+        badge_color = (245, 158, 11)
     cv2.circle(annotated, (20, 22), 7, badge_color, -1)
     cv2.putText(annotated, f"ROBOMASTER SLAM · {badge_title}", (35, 28),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2, cv2.LINE_AA)
+                cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 255, 255), 2, cv2.LINE_AA)
 
     # 3. Draw Bottom Telemetry Banner
     cv2.rectangle(annotated, (0, h - 42), (w, h), (15, 23, 42), -1)
     area_px = int(item.get("area", 0))
     conf_pct = int(item.get("confidence", 1.0) * 100) if "confidence" in item else 100
     gimbal_info = f" | Pitch:{pitch:+.1f}deg Yaw:{yaw:+.1f}deg" if (pitch is not None and yaw is not None) else ""
-    info_text = (f"Pos: ({x_cell},{y_cell}) {direction} | {color_name.upper()} {shape_name.upper()} | "
+    target_tag = "⚠️ HOSTAGE (ตัวประกัน - ห้ามยิง)" if is_hostage else f"{color_name.upper()} {shape_name.upper()}"
+    info_text = (f"Pos: ({x_cell},{y_cell}) {direction} | {target_tag} | "
                  f"Area: {area_px}px | Conf: {conf_pct}%{gimbal_info} | Time: {time_display}")
     cv2.putText(annotated, info_text, (12, h - 14),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.48, (226, 232, 240), 1, cv2.LINE_AA)
@@ -649,10 +719,11 @@ def save_target_snapshot(frame, cell, direction, item, fired=False, pitch=None, 
         "cell": cell,
         "direction": direction,
         "color": color_name,
-        "shape": shape_name,
+        "shape": "hostage" if is_hostage else shape_name,
+        "is_hostage": is_hostage,
         "area": area_px,
         "confidence": conf_pct,
-        "fired": fired,
+        "fired": False if is_hostage else fired,
         "time": time_display,
         "pitch": pitch,
         "yaw": yaw,

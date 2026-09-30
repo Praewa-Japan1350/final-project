@@ -129,9 +129,12 @@ def save_outputs(round_name=None, generate_plot=True):
         w.writerow(["grid_x", "grid_y", "direction", "color", "color_label", "shape", "shape_label", "area_px", "image_path"])
         for (cell, direction), signs in sorted(state.detected_signs.items()):
             for sign in signs:
+                is_hostage = sign.get("is_hostage") or sign.get("shape") == "hostage"
+                s_shape = "hostage" if is_hostage else sign["shape"]
+                s_label = "ตัวประกัน (ห้ามยิง)" if is_hostage else sign.get("shape_label", s_shape)
                 w.writerow([
                     cell[0], cell[1], direction, sign["color"], sign.get("label", ""),
-                    sign["shape"], sign.get("shape_label", ""), round(sign.get("area", 0)),
+                    s_shape, s_label, round(sign.get("area", 0)),
                     sign.get("image_path", ""),
                 ])
 
@@ -211,7 +214,11 @@ def save_outputs(round_name=None, generate_plot=True):
                         sy = y - 1 + 0.10 + icon_row * 0.14
                         bgr = COLORS[sign["color"]]["bgr"]
                         color = "#%02x%02x%02x" % tuple(reversed(bgr))
-                        if sign["shape"] == "circle":
+                        is_hostage = sign.get("is_hostage") or sign.get("shape") == "hostage"
+                        if is_hostage:
+                            marker = patches.RegularPolygon((sx, sy), numVertices=5, radius=0.040,
+                                                            facecolor="#f59e0b", edgecolor="#dc2626", linewidth=1.2, zorder=18)
+                        elif sign["shape"] == "circle":
                             marker = patches.Circle((sx, sy), radius=0.035, facecolor=color,
                                                     edgecolor="#0f172a", linewidth=0.6, zorder=16)
                         elif sign["shape"] == "square":
