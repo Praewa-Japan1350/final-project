@@ -7,6 +7,7 @@ gimbal-only 4-direction scanning, and fine-tuning cell auto-recentering.
 
 import math
 import time
+import concurrent.futures
 from collections import defaultdict
 
 import numpy as np
@@ -34,6 +35,8 @@ from config import (
     ROT_SPEED,
     SAFE_FRONT_DIST_MM,
     SPEED,
+    TARGET_FRONT_WALL_DIST_MM,
+    TARGET_LATERAL_WALL_DIST_MM,
     TARGET_WALL_DIST_MM,
     TOF_ID,
     WALL_THRESHOLD_MM,
@@ -77,6 +80,30 @@ LIGHT_NOISE_BAND_MM = 80 # Borderline zone around WALL_THRESHOLD for re-confirm
 AIM_CENTER_X_FRACTION = 0.025
 AIM_CENTER_Y_FRACTION = 0.03
 _last_ir_debug = None
+
+# Thread-pool for hard-timeout SDK waits (1 thread is enough; calls are serial)
+_sdk_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+
+
+def _safe_wait(action, timeout=3.0):
+    """Wait for an SDK action with a hard thread-based timeout.
+
+    The RoboMaster SDK's wait_for_completed(timeout=...) can sometimes
+    deadlock when the WiFi link is degraded or the robot never ACKs the
+    command.  This helper runs the wait in a background thread and
+    enforces a real wall-clock deadline so the exploration loop is never
+    blocked indefinitely.
+
+    Returns True if the action completed, False on timeout.
+    """
+    if action is None:
+        return False
+    future = _sdk_executor.submit(action.wait_for_completed, timeout=timeout)
+    try:
+        return future.result(timeout=timeout + 2.0)
+    except (concurrent.futures.TimeoutError, Exception) as exc:
+        print(f"[SAFE_WAIT] Hard timeout ({timeout}s) exceeded or error: {exc}")
+        return False
 
 
 def reset_sensor_filters():
@@ -211,9 +238,9 @@ def read_distance_with_gimbal(ep_gimbal, cell, current_heading, target_dir, sim_
 
     # The caller may choose a down pitch for a combined wall/color scan.
     if ep_gimbal and move_gimbal:
-        if not ep_gimbal.moveto(pitch=gimbal_pitch, yaw=target_yaw,
-                                pitch_speed=GIMBAL_SPEED,
-                                yaw_speed=GIMBAL_SPEED).wait_for_completed(timeout=1.5):
+        if not _safe_wait(ep_gimbal.moveto(pitch=gimbal_pitch, yaw=target_yaw,
+                                           pitch_speed=GIMBAL_SPEED,
+                                           yaw_speed=GIMBAL_SPEED), timeout=1.5):
             return float("inf")
 
     # Allow sensor to settle after gimbal rotation
@@ -250,8 +277,8 @@ def read_distance_at_yaw(ep_gimbal, cell, direction_key, yaw, sim_mode):
     if sim_mode:
         return 9999.0
     if ep_gimbal:
-        if not ep_gimbal.moveto(pitch=3, yaw=yaw, pitch_speed=COLOR_SCAN_SPEED,
-                                yaw_speed=GIMBAL_SPEED).wait_for_completed(timeout=1.5):
+        if not _safe_wait(ep_gimbal.moveto(pitch=3, yaw=yaw, pitch_speed=COLOR_SCAN_SPEED,
+                                           yaw_speed=GIMBAL_SPEED), timeout=1.5):
             return float("inf")
     time.sleep(0.15)
     samples = []
@@ -271,9 +298,9 @@ def read_target_range_at_yaw(ep_gimbal, cell, direction_key, yaw, sim_mode):
     if sim_mode:
         return 9999.0
     if ep_gimbal:
-        if not ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=yaw,
-                                pitch_speed=COLOR_SCAN_SPEED,
-                                yaw_speed=GIMBAL_SPEED).wait_for_completed(timeout=1.5):
+        if not _safe_wait(ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=yaw,
+                                           pitch_speed=COLOR_SCAN_SPEED,
+                                           yaw_speed=GIMBAL_SPEED), timeout=1.5):
             return float("inf")
     time.sleep(0.12)
     samples = []
@@ -299,7 +326,7 @@ def turn_to_direction(ep_chassis, ep_gimbal, current, target, sim_mode):
 
     def wait_turn(action):
         try:
-            completed = action.wait_for_completed(timeout=2.5)
+            completed = _safe_wait(action, timeout=2.5)
         except Exception:
             completed = False
         if not completed:
@@ -346,7 +373,7 @@ def turn_to_direction(ep_chassis, ep_gimbal, current, target, sim_mode):
                 return False
 
     if ep_gimbal and not sim_mode:
-        if not ep_gimbal.recenter().wait_for_completed(timeout=1.5):
+        if not _safe_wait(ep_gimbal.recenter(), timeout=1.5):
             return False
     return True
 
@@ -362,16 +389,16 @@ def align_heading(ep_chassis, heading, sim_mode):
     stop_and_settle(ep_chassis, sim_mode, settle_s=0.20)
     yaw_error = _normalize_angle(target_yaw - state.current_yaw)
     if abs(yaw_error) > 1.5:
-        if not ep_chassis.move(x=0, y=0, z=round(-yaw_error, 1),
-                               z_speed=ROT_SPEED).wait_for_completed(timeout=2.5):
+        if not _safe_wait(ep_chassis.move(x=0, y=0, z=round(-yaw_error, 1),
+                                          z_speed=ROT_SPEED), timeout=2.5):
             ep_chassis.drive_speed(x=0, y=0, z=0)
             time.sleep(0.10)
 
     # One short fine-tune pass, matching the existing turn controller.
     yaw_error = _normalize_angle(target_yaw - state.current_yaw)
     if abs(yaw_error) > 2.0:
-        if not ep_chassis.move(x=0, y=0, z=round(-yaw_error, 1),
-                               z_speed=ROT_SPEED).wait_for_completed(timeout=2.5):
+        if not _safe_wait(ep_chassis.move(x=0, y=0, z=round(-yaw_error, 1),
+                                          z_speed=ROT_SPEED), timeout=2.5):
             ep_chassis.drive_speed(x=0, y=0, z=0)
             time.sleep(0.10)
 
@@ -472,9 +499,9 @@ def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard
             break
 
         # 2. Front wall arrival: if moving into a cell facing a wall,
-        # when ToF shows we reached the cell center (~200mm from wall)
+        # when ToF shows we reached the cell center (~150mm from wall)
         # and we have traveled at least 0.50m, brake cleanly.
-        if traveled >= config.GRID_SIZE_M - 0.10 and EMERGENCY_STOP_DIST_MM < state.current_distance <= (TARGET_WALL_DIST_MM + 20):
+        if traveled >= config.GRID_SIZE_M - 0.10 and EMERGENCY_STOP_DIST_MM < state.current_distance <= (TARGET_FRONT_WALL_DIST_MM + 20):
             front_wall_reached = True
             break
 
@@ -560,7 +587,7 @@ def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard
 
 def aim_gimbal_at_detection(ep_gimbal, detection, frame_shape, yaw_offset=0.0,
                             aim_y_fraction=0.30, lock_yaw=False, pitch_up_deg=BLASTER_PITCH_UP_DEG):
-    """Aim gimbal at the detected target, tilted up (+8.0°) so the blaster below the camera hits the sign."""
+    """Aim gimbal at the detected target, tilted up (+7.5°) so the blaster below the camera hits the sign."""
     if not ep_gimbal or frame_shape is None:
         return None
     frame_height, frame_width = frame_shape[:2]
@@ -578,8 +605,8 @@ def aim_gimbal_at_detection(ep_gimbal, detection, frame_shape, yaw_offset=0.0,
     # Elevate pitch by pitch_up_deg (+8.0°) to compensate for the blaster barrel being below the camera lens,
     # ensuring the shot hits the center of the sign and does not strike the stand below it.
     pitch = max(-20.0, min(30.0, COLOR_SCAN_PITCH - dy / frame_height * vertical_fov + pitch_up_deg))
-    completed = ep_gimbal.moveto(pitch=pitch, yaw=yaw, pitch_speed=90,
-                                 yaw_speed=90).wait_for_completed(timeout=1.5)
+    completed = _safe_wait(ep_gimbal.moveto(pitch=pitch, yaw=yaw, pitch_speed=90,
+                                             yaw_speed=90), timeout=1.5)
     if not completed:
         return None
     time.sleep(0.12)
@@ -598,7 +625,7 @@ def _move_relative_cm(ep_chassis, x_m, y_m):
     try:
         action = ep_chassis.move(x=round(x_m, 3), y=round(y_m, 3), z=0,
                                  xy_speed=0.08)
-        completed = action.wait_for_completed(timeout=1.8)
+        completed = _safe_wait(action, timeout=1.8)
         stop_and_settle(ep_chassis, False, settle_s=0.25)
         return bool(completed)
     except Exception:
@@ -682,8 +709,8 @@ def aim_verify_and_fire(ep_chassis, ep_gimbal, ep_blaster, camera_reader, detect
                             cur_pitch, cur_yaw = aimed
                             fine_yaw = max(-240.0, min(240.0, cur_yaw + (center_dx / fw) * 96.0))
                             fine_pitch = max(-20.0, min(30.0, cur_pitch - (center_dy / fh) * 54.0))
-                            ep_gimbal.moveto(pitch=fine_pitch, yaw=fine_yaw, pitch_speed=60,
-                                             yaw_speed=60).wait_for_completed(timeout=1.0)
+                            _safe_wait(ep_gimbal.moveto(pitch=fine_pitch, yaw=fine_yaw, pitch_speed=60,
+                                                         yaw_speed=60), timeout=1.0)
                             if dashboard:
                                 dashboard.log(f"🎯 [BLASTER AIM] เล็งปรับกลางป้าย {color.upper()} {shape.upper()} (dx={center_dx:.0f}px, dy={center_dy:.0f}px, pitch={fine_pitch:.1f}°)")
             except Exception as fine_err:
@@ -792,9 +819,9 @@ def scan_sides_and_front(ep_chassis, ep_gimbal, position, current_heading, sim_m
         if not search_targets or sim_mode or not camera_reader or not ep_gimbal:
             continue
 
-        if not ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=yaw_angle,
-                                pitch_speed=COLOR_SCAN_SPEED,
-                                yaw_speed=GIMBAL_SPEED).wait_for_completed(timeout=1.5):
+        if not _safe_wait(ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=yaw_angle,
+                                            pitch_speed=COLOR_SCAN_SPEED,
+                                            yaw_speed=GIMBAL_SPEED), timeout=1.5):
             if dashboard:
                 dashboard.log(f"Gimbal move timed out at {dir_name}; skipping.")
             continue
@@ -879,7 +906,7 @@ def scan_sides_and_front(ep_chassis, ep_gimbal, position, current_heading, sim_m
 
     # 3. Recenter gimbal
     if ep_gimbal and not sim_mode:
-        ep_gimbal.recenter().wait_for_completed(timeout=1.2)
+        _safe_wait(ep_gimbal.recenter(), timeout=1.2)
     if dashboard:
         dashboard.update(position, current_heading, step, "Scan complete (Front/Right/Left)",
                          extra_readings=readings, gimbal_dir=None)
@@ -953,12 +980,12 @@ def scan_4_directions(ep_chassis, ep_gimbal, position, current_heading, sim_mode
             # The wall read already turned yaw toward this side. Lower pitch
             # with a relative pitch-only move so yaw is commanded exactly once
             # for the wall/color pair.
-            ep_gimbal.move(
+            _safe_wait(ep_gimbal.move(
                 pitch=COLOR_SCAN_PITCH - 3,
                 yaw=0,
                 pitch_speed=COLOR_SCAN_SPEED,
                 yaw_speed=0,
-            ).wait_for_completed()
+            ), timeout=2.0)
 
         color_scan_ready = (perform_color_scan and camera_reader is not None and
                             30 <= dist <= MAX_TARGET_RANGE_MM)
@@ -1075,8 +1102,8 @@ def scan_4_directions(ep_chassis, ep_gimbal, position, current_heading, sim_mode
             if state.stop_requested:
                 break
             yaw = (world_angle - heading_angle + 180) % 360 - 180
-            ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=yaw,
-                             pitch_speed=COLOR_SCAN_SPEED, yaw_speed=GIMBAL_SPEED).wait_for_completed()
+            _safe_wait(ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=yaw,
+                             pitch_speed=COLOR_SCAN_SPEED, yaw_speed=GIMBAL_SPEED), timeout=2.0)
             time.sleep(COLOR_SCAN_HOLD_S)
             detected, view, summary = detect_stable_signs(
                 camera_reader, dashboard, color_filter=None, shape_filter=None)
@@ -1095,7 +1122,7 @@ def scan_4_directions(ep_chassis, ep_gimbal, position, current_heading, sim_mode
 
     # Recenter gimbal back to center (0 degrees)
     if ep_gimbal and not sim_mode:
-        ep_gimbal.recenter().wait_for_completed()
+        _safe_wait(ep_gimbal.recenter(), timeout=2.0)
 
     if dashboard:
         dashboard.update(position, current_heading, step, "Gimbal Recenter เรียบร้อย", extra_readings=readings, gimbal_dir=None)
@@ -1146,22 +1173,22 @@ def recenter_in_cell(ep_chassis, ep_gimbal, readings, position, current_heading,
         chassis_y_mm = (dist_right - dist_left) / 2.0
     elif wall_left:
         # +y moves right: hold a 20cm gap from a single left wall.
-        chassis_y_mm = TARGET_WALL_DIST_MM - dist_left
+        chassis_y_mm = TARGET_LATERAL_WALL_DIST_MM - dist_left
     elif wall_right:
         # +y moves right: hold a 20cm gap from a single right wall.
-        chassis_y_mm = dist_right - TARGET_WALL_DIST_MM
+        chassis_y_mm = dist_right - TARGET_LATERAL_WALL_DIST_MM
 
     # 2. Longitudinal adjustment (Chassis X: +x = Forward, -x = Backward)
-    # Use front/rear ToF to set the robot 20 cm from a detected wall when enabled.
+    # Use front/rear ToF to set the robot 15 cm from a detected wall when enabled.
     chassis_x_mm = 0.0
     if ENABLE_LONGITUDINAL_RECENTER:
         if wall_front and wall_back:
             # Balanced directly between front and back walls
             chassis_x_mm = (dist_front - dist_back) / 2.0
         elif wall_front:
-            chassis_x_mm = dist_front - TARGET_WALL_DIST_MM
+            chassis_x_mm = dist_front - TARGET_FRONT_WALL_DIST_MM
         elif wall_back:
-            chassis_x_mm = TARGET_WALL_DIST_MM - dist_back
+            chassis_x_mm = TARGET_FRONT_WALL_DIST_MM - dist_back
 
     chassis_x = chassis_x_mm / 1000.0
     chassis_y = chassis_y_mm / 1000.0
@@ -1202,11 +1229,11 @@ def recenter_in_cell(ep_chassis, ep_gimbal, readings, position, current_heading,
     if sim_mode:
         time.sleep(0.12)
     else:
-        ep_chassis.move(x=round(chassis_x, 3), y=round(chassis_y, 3), z=0, xy_speed=RECENTER_SPEED).wait_for_completed()
+        _safe_wait(ep_chassis.move(x=round(chassis_x, 3), y=round(chassis_y, 3), z=0, xy_speed=RECENTER_SPEED), timeout=3.0)
         stop_and_settle(ep_chassis, sim_mode, settle_s=0.20)
         align_heading(ep_chassis, current_heading, sim_mode)
         if ep_gimbal:
-            ep_gimbal.recenter().wait_for_completed(timeout=1.5)
+            _safe_wait(ep_gimbal.recenter(), timeout=1.5)
         time.sleep(0.20)
 
     return shift_x_m, shift_y_m

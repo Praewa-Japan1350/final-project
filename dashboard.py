@@ -47,7 +47,7 @@ class Dashboard:
         self.vision_analyzer = None
         self._last_filter_frame_id = -1
         self._filter_photo = None
-        self._ui_queue = queue.Queue(maxsize=256)
+        self._ui_queue = queue.Queue(maxsize=1024)
         self._ui_coalesce_lock = threading.Lock()
         self._ui_coalesced = {}
         self._ui_coalesced_scheduled = set()
@@ -1329,10 +1329,10 @@ class Dashboard:
         """Register a new target snapshot into the dashboard gallery and update the preview card."""
         if not filepath or not metadata:
             return
-        self.target_results.append(metadata)
         def _apply():
             if self.closed:
                 return
+            self.target_results.append(metadata)
             # 1. Update Gallery Button Count
             self.btn_gallery.config(text=f"🖼️ ภาพเป้าหมาย ({len(self.target_results)})")
             # 2. Update Latest Target Card
@@ -1625,6 +1625,16 @@ class Dashboard:
         def _do_update():
             if self.closed:
                 return
+
+            with state.state_lock:
+                snap_visited = set(state.visited_cells)
+                snap_discovered = set(state.discovered_cells)
+                snap_h_walls = list(state.detected_h_walls)
+                snap_v_walls = list(state.detected_v_walls)
+                snap_signs = [(k, list(v)) for k, v in state.detected_signs.items()]
+                snap_trajectory = list(state.trajectory)
+                snap_distance = float(state.current_distance)
+
             self.canvas.delete("all")
 
             cur_gw = config.GRID_W
@@ -1637,13 +1647,13 @@ class Dashboard:
                     cy = self.pad + (cur_gh - y) * self.cell_size
                     cell_coord = (x, y)
 
-                    if cell_coord in state.visited_cells:
+                    if cell_coord in snap_visited:
                         fill_color = "#f0fdf4"   # Luxury Mint Cream
                         border_color = "#10b981" # Emerald border
                         label = "VISITED"
                         label_color = "#047857"
                         coord_color = "#065f46"
-                    elif cell_coord in state.discovered_cells:
+                    elif cell_coord in snap_discovered:
                         fill_color = "#f0f9ff"   # Azure Light
                         border_color = "#38bdf8"
                         label = "OPEN"
@@ -1659,7 +1669,7 @@ class Dashboard:
                     self.canvas.create_rectangle(
                         cx, cy, cx + self.cell_size, cy + self.cell_size,
                         fill=fill_color, outline=border_color, width=1.2,
-                        dash=(3, 3) if cell_coord not in state.visited_cells else None
+                        dash=(3, 3) if cell_coord not in snap_visited else None
                     )
 
                     coord_font_size = max(7, min(10, int(self.cell_size * 0.11)))
@@ -1674,7 +1684,7 @@ class Dashboard:
                     )
 
                     cell_signs = {}
-                    for (sign_cell, _direction), signs in state.detected_signs.items():
+                    for (sign_cell, _direction), signs in snap_signs:
                         if sign_cell == cell_coord:
                             for sign in signs:
                                 cell_signs[(sign["color"], sign["shape"])] = sign
@@ -1705,7 +1715,7 @@ class Dashboard:
             wall_glow = "#fecdd3"  # Soft Rose Red aura
 
             # Horizontal foam walls: between (x, y) and (x, y+1)
-            for (wx, wy) in state.detected_h_walls:
+            for (wx, wy) in snap_h_walls:
                 lx1 = self.pad + (wx - 1) * self.cell_size
                 lx2 = lx1 + self.cell_size
                 ly = self.pad + (cur_gh - wy) * self.cell_size
@@ -1713,7 +1723,7 @@ class Dashboard:
                 self.canvas.create_line(lx1, ly, lx2, ly, fill=wall_color, width=4, capstyle=tk.ROUND)
 
             # Vertical foam walls: between (x, y) and (x+1, y)
-            for (wx, wy) in state.detected_v_walls:
+            for (wx, wy) in snap_v_walls:
                 lx = self.pad + wx * self.cell_size
                 ly1 = self.pad + (cur_gh - wy) * self.cell_size
                 ly2 = ly1 + self.cell_size
@@ -1721,7 +1731,7 @@ class Dashboard:
                 self.canvas.create_line(lx, ly1, lx, ly2, fill=wall_color, width=4, capstyle=tk.ROUND)
 
             # 3. Draw trajectory path
-            for item in state.trajectory:
+            for item in snap_trajectory:
                 if item["previous"] is None:
                     continue
                 previous = item["previous"]
@@ -1755,10 +1765,10 @@ class Dashboard:
                 beam_y = cy - int(gdy * beam_len)
                 self.canvas.create_line(cx, cy, beam_x, beam_y, fill="#d97706", width=3, arrow=tk.LAST)
 
-            visited_cnt = len(state.visited_cells)
+            visited_cnt = len(snap_visited)
             total_cells = cur_gw * cur_gh
-            wall_cnt = len(state.detected_h_walls) + len(state.detected_v_walls)
-            target_cnt = sum(len(s) for s in state.detected_signs.values())
+            wall_cnt = len(snap_h_walls) + len(snap_v_walls)
+            target_cnt = sum(len(s) for _, s in snap_signs)
 
             readings_str = ""
             if extra_readings:
@@ -1771,7 +1781,7 @@ class Dashboard:
                 f"สถานะปัจจุบัน: {status}{timer_badge}\n"
                 f"รอบที่: {step}   |   พิกัดปัจจุบัน: {position}   |   ทิศทางหุ่น: {heading}\n"
                 f"สำรวจสำเร็จ: {visited_cnt}/{total_cells} ช่อง ({visited_cnt / total_cells * 100:.1f}%)   |   กำแพงโฟม: {wall_cnt} แนว   |   เป้าหมายที่พบ: {target_cnt} เป้า\n"
-                f"ระยะ ToF ด้านหน้า: {state.current_distance:.0f} mm{readings_str}"
+                f"ระยะ ToF ด้านหน้า: {snap_distance:.0f} mm{readings_str}"
             ))
 
         # Robot telemetry can request redraws faster than Tk can paint them.
@@ -1794,9 +1804,9 @@ class Dashboard:
     def _drain_ui_queue(self):
         if self.closed:
             return
-        # Keep each Tk tick short even when robot telemetry and logs arrive
-        # in bursts; the rest drains on the next scheduled tick.
-        for _ in range(8):
+        # Process pending UI updates up to 25ms to keep UI responsive without backlog
+        start_t = time.monotonic()
+        while time.monotonic() - start_t < 0.025:
             try:
                 callback = self._ui_queue.get_nowait()
             except queue.Empty:
@@ -1810,9 +1820,6 @@ class Dashboard:
                 if callback is not None:
                     callback()
             except Exception:
-                # A failed UI update must not kill the queue pump; otherwise
-                # subsequent telemetry updates pile up and the window appears
-                # frozen even though the mission thread is still running.
                 traceback.print_exc()
         try:
             self.root.after(15, self._drain_ui_queue)

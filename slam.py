@@ -28,6 +28,7 @@ from evaluation import save_outputs
 from navigation import find_path_to_nearest_unvisited, astar_path
 from navigation import is_wall_between
 from robot_control import (
+    _safe_wait,
     align_heading,
     aim_verify_and_fire,
     move_one_cell,
@@ -69,15 +70,16 @@ def _direction_yaw(heading, target_direction):
 
 def _record_pose(step, position, heading):
     """Record a confirmed robot position for the round trajectory image."""
-    previous = state.trajectory[-1]["cell"] if state.trajectory else None
-    state.trajectory.append({
-        "step": step, "timestamp": round(time.time(), 2),
-        "grid_x": position[0], "grid_y": position[1],
-        "x_m": round((position[0] - 0.5) * config.GRID_SIZE_M, 3),
-        "y_m": round((position[1] - 0.5) * config.GRID_SIZE_M, 3),
-        "heading": heading, "tof_mm": state.current_distance,
-        "cell": position, "previous": previous,
-    })
+    with state.state_lock:
+        previous = state.trajectory[-1]["cell"] if state.trajectory else None
+        state.trajectory.append({
+            "step": step, "timestamp": round(time.time(), 2),
+            "grid_x": position[0], "grid_y": position[1],
+            "x_m": round((position[0] - 0.5) * config.GRID_SIZE_M, 3),
+            "y_m": round((position[1] - 0.5) * config.GRID_SIZE_M, 3),
+            "heading": heading, "tof_mm": state.current_distance,
+            "cell": position, "previous": previous,
+        })
 
 
 def clean_old_results():
@@ -134,25 +136,26 @@ def clean_old_results():
 
 
 def _save_mission_map(start_config):
-    payload = {
-        "version": 3,
-        "grid_size_m": config.GRID_SIZE_M,
-        "grid_width": config.GRID_W,
-        "grid_height": config.GRID_H,
-        "start": list(start_config),
-        "h_walls": sorted([list(edge) for edge in state.detected_h_walls]),
-        "v_walls": sorted([list(edge) for edge in state.detected_v_walls]),
-        "discovered": sorted([list(cell) for cell in state.discovered_cells]),
-        "visited": sorted([list(cell) for cell in state.visited_cells]),
-        "targets": [
-            {"cell": list(cell), "direction": direction, "signs": signs}
-            for (cell, direction), signs in state.detected_signs.items() if signs
-        ],
-        "color_scans": [
-            {"cell": list(cell), "direction": direction, **scan}
-            for (cell, direction), scan in state.color_scan_results.items()
-        ],
-    }
+    with state.state_lock:
+        payload = {
+            "version": 3,
+            "grid_size_m": config.GRID_SIZE_M,
+            "grid_width": config.GRID_W,
+            "grid_height": config.GRID_H,
+            "start": list(start_config),
+            "h_walls": sorted([list(edge) for edge in state.detected_h_walls]),
+            "v_walls": sorted([list(edge) for edge in state.detected_v_walls]),
+            "discovered": sorted([list(cell) for cell in state.discovered_cells]),
+            "visited": sorted([list(cell) for cell in state.visited_cells]),
+            "targets": [
+                {"cell": list(cell), "direction": direction, "signs": list(signs)}
+                for (cell, direction), signs in state.detected_signs.items() if signs
+            ],
+            "color_scans": [
+                {"cell": list(cell), "direction": direction, **scan}
+                for (cell, direction), scan in state.color_scan_results.items()
+            ],
+        }
     os.makedirs(MAP_DIR, exist_ok=True)
     temp_path = MISSION_MAP_PATH + ".tmp"
     with open(temp_path, "w", encoding="utf-8") as output:
@@ -277,8 +280,8 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
         # Center the sign optically with the gimbal instead of translating the
         # robot toward a single wall and drifting off the grid.
         if ep_gimbal and not sim_mode:
-            ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=target_yaw, pitch_speed=COLOR_SCAN_SPEED,
-                             yaw_speed=GIMBAL_SPEED).wait_for_completed(timeout=1.5)
+            _safe_wait(ep_gimbal.moveto(pitch=COLOR_SCAN_PITCH - 3, yaw=target_yaw, pitch_speed=COLOR_SCAN_SPEED,
+                             yaw_speed=GIMBAL_SPEED), timeout=1.5)
         # Hold the chassis still before collecting the final target frames.
         stop_and_settle(ep_chassis, sim_mode, settle_s=0.35)
         target_range = read_target_range_at_yaw(ep_gimbal, position, target_heading, target_yaw, sim_mode)
@@ -336,7 +339,7 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
         elif dashboard:
             dashboard.log(f"⚠️ ไม่พบเป้าหมายสดด้าน {target_heading} (อาจติดมุมแสง) ข้ามไปเป้าหมายถัดไป")
         if ep_gimbal and not sim_mode:
-            ep_gimbal.recenter().wait_for_completed(timeout=1.5)
+            _safe_wait(ep_gimbal.recenter(), timeout=1.5)
         targets.remove(target)
         step += 1
 
@@ -519,8 +522,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                     break
                 try:
                     if state.visited_cells and is_mapping_round:
-                        _save_mission_map(start_config)
-                        save_outputs("autosave", generate_plot=False)
+                        with state.state_lock:
+                            _save_mission_map(start_config)
+                            save_outputs("autosave", generate_plot=False)
                         msg = f"💾 [AUTOSAVE 10s] บันทึกแผนที่ ({len(state.visited_cells)} ช่อง) และ Log การเดินอัตโนมัติ"
                         if dashboard:
                             dashboard.log(msg)
@@ -628,19 +632,26 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             turn_to_direction(ep_chassis, ep_gimbal, heading, target_heading, sim_mode)
             align_heading(ep_chassis, target_heading, sim_mode)
             heading = target_heading
-            # Previously visited cells are path retraces: keep a straight
-            # heading correction active while the forward IR/ToF prevents impact.
-            front_dist = read_distance_with_gimbal(ep_gimbal, position, heading, heading, sim_mode)
-            if not _front_is_clear(front_dist):
-                state.last_move_reason = "PREFLIGHT_WALL" if math.isfinite(float(front_dist)) and front_dist > 30 else "TOF_INVALID"
-                state.last_move_distance_m = 0.0
+            # Self-collision avoidance: check known wall before moving forward
+            if is_wall_between(position, target_heading):
+                if dashboard:
+                    dashboard.log(f"⚠️ Detected wall in map towards {target_heading}; skipping move to avoid collision.")
                 move_ok = False
+                # Skip further movement for this iteration
             else:
-                move_ok = move_one_cell(
-                    ep_chassis, sim_mode, heading=heading,
-                    returning=next_cell in state.visited_cells,
-                    dashboard=dashboard,
-                )
+                # Previously visited cells are path retraces: keep a straight
+                # heading correction active while the forward IR/ToF prevents impact.
+                front_dist = read_distance_with_gimbal(ep_gimbal, position, heading, heading, sim_mode)
+                if not _front_is_clear(front_dist):
+                    state.last_move_reason = "PREFLIGHT_WALL" if math.isfinite(float(front_dist)) and front_dist > 30 else "TOF_INVALID"
+                    state.last_move_distance_m = 0.0
+                    move_ok = False
+                else:
+                    move_ok = move_one_cell(
+                        ep_chassis, sim_mode, heading=heading,
+                        returning=next_cell in state.visited_cells,
+                        dashboard=dashboard,
+                    )
 
             if move_ok:
                 position = next_cell
@@ -721,37 +732,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
 
             step += 1
 
-        # Finish at the saved start pose so Run 2 can begin immediately from
-        # the same physical cell without relying on a stale pose assumption.
-        if (is_mapping_round and not state.stop_requested
-                and time.monotonic() - round_started < round_limit_s and position != start_pos):
-            return_path = _shortest_cell_path(position, start_pos, current_heading=heading)
-            if return_path:
-                if dashboard:
-                    dashboard.log("Mapping complete; returning to the saved start cell for Run 2 (A*).")
-                for next_cell in return_path[1:]:
-                    if time.monotonic() >= round_started + round_limit_s:
-                        state.stop_requested = True
-                        break
-                    target_heading = next(d for d in DIRECTIONS if adjacent(position, d) == next_cell)
-                    turn_to_direction(ep_chassis, ep_gimbal, heading, target_heading, sim_mode)
-                    align_heading(ep_chassis, target_heading, sim_mode)
-                    heading = target_heading
-                    front_dist = read_distance_with_gimbal(ep_gimbal, position, heading, heading, sim_mode)
-                    if not _front_is_clear(front_dist) or not move_one_cell(
-                            ep_chassis, sim_mode, heading=heading, returning=True):
-                        state.stop_requested = True
-                        if dashboard:
-                            dashboard.log("Safety stop while returning to the saved start cell.")
-                        break
-                    position = next_cell
-                    step += 1
-                    if dashboard:
-                        dashboard.update(position, heading, step, "Returning to Run 2 start cell")
-                if not state.stop_requested:
-                    turn_to_direction(ep_chassis, ep_gimbal, heading, start_config[2], sim_mode)
-                    align_heading(ep_chassis, start_config[2], sim_mode)
-                    heading = start_config[2]
+        # Per user request: after completing exploration of all reachable cells,
+        # stop the robot without returning to the start cell (no return-to-start).
+
 
         total_detected_walls = len(state.detected_h_walls) + len(state.detected_v_walls)
         total_targets = sum(len(s) for s in state.detected_signs.values())
@@ -803,7 +786,8 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             dashboard.log(f"• ระยะทางเดินทั้งหมด: {len(state.trajectory) * config.GRID_SIZE_M:.2f} เมตร ({len(state.trajectory)} ก้าว)")
             dashboard.log("• บันทึกไฟล์ผลลัพธ์  : โฟลเดอร์ results/ และ final_slam_map.png")
             dashboard.log("=" * 60)
-            dashboard.show_final_map_window(round_label)
+            _rl = round_label
+            dashboard._post_ui(lambda: dashboard.show_final_map_window(_rl))
 
     except KeyboardInterrupt:
         print("\n⚠️ ผู้ใช้กดหยุดฉุกเฉิน (KeyboardInterrupt / Ctrl+C)")
@@ -851,7 +835,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                 pass
         if ep_gimbal:
             try:
-                ep_gimbal.recenter().wait_for_completed()
+                _safe_wait(ep_gimbal.recenter(), timeout=2.0)
             except Exception:
                 pass
         if vision_analyzer:
@@ -975,6 +959,19 @@ def main():
                     print(f"💾 บันทึกแผนที่ ({len(state.visited_cells)} ช่อง) และ Log การเดินเรียบร้อยแล้ว!")
                 except Exception as se:
                     print(f"Error saving on Ctrl+C: {se}")
+        except Exception as e:
+            print(f"\n❌ [GUI EXCEPTION] หน้าต่าง GUI เกิดข้อผิดพลาด: {e}")
+            import traceback
+            traceback.print_exc()
+            state.stop_requested = True
+            if state.visited_cells:
+                try:
+                    cfg = dashboard.get_start_config() if dashboard else default_start
+                    _save_mission_map(cfg)
+                    save_outputs("emergency_crash_stop")
+                    print(f"💾 [CRASH RECOVERY] บันทึกแผนที่ฉุกเฉิน ({len(state.visited_cells)} ช่อง) เรียบร้อยแล้ว!")
+                except Exception as se:
+                    print(f"Error saving on crash: {se}")
 
 
 if __name__ == "__main__":

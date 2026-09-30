@@ -5,6 +5,16 @@ Calculates map coverage and accuracy metrics against ground truth,
 and exports CSV logs, text reports, and a high-resolution trajectory map plot.
 """
 
+# Set matplotlib backend to Agg (non-interactive, file-only) BEFORE any other
+# import can trigger the TkAgg backend. This must happen at module load time
+# so that calling matplotlib.use() later from a background thread does not
+# race with Tkinter and destabilise the GUI window.
+import importlib.util as _ilu
+if _ilu.find_spec("matplotlib") is not None:
+    # pyrefly: ignore [missing-import]
+    import matplotlib as _mpl
+    _mpl.use("Agg")   # no force=True — only sets if not yet set
+
 from config import GRID_H
 from config import GRID_W
 import csv
@@ -170,7 +180,9 @@ def save_outputs(round_name=None, generate_plot=True):
     try:
         # pyrefly: ignore [missing-import]
         import matplotlib
-        matplotlib.use("Agg", force=True)
+        # Backend must already be set to Agg at module level above.
+        # Do NOT call matplotlib.use() here — it is not thread-safe when
+        # called from a background thread while Tkinter is running.
         # pyrefly: ignore [missing-import]
         import matplotlib.pyplot as plt
         # pyrefly: ignore [missing-import]

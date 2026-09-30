@@ -43,17 +43,19 @@ IR_EVADE_SPEED_MPS = 0.10
 IR_EVADE_ACCEL_MPS2 = 0.30
 WALL_THRESHOLD_MM = 550 # Distance <= 550mm indicates a foam wall on immediate cell border (open passages >= 700mm)
 RECENTER_WALL_MAX_MM = 400 # Use walls within 40cm for recentering
-TARGET_WALL_DIST_MM = 200 # Target distance from a single detected wall during recentering (20cm)
+TARGET_FRONT_WALL_DIST_MM = 150 # Target distance from front wall during recentering (15cm)
+TARGET_LATERAL_WALL_DIST_MM = 200 # Target distance from left/right side walls during recentering (20cm)
+TARGET_WALL_DIST_MM = 150   # Default alias for backward compatibility (15cm)
 SAFE_MIN_MM = 280       # Minimum safe distance to a single side wall (mm)
 SAFE_MAX_MM = 300       # Maximum safe distance to a single side wall (mm)
-SAFE_FRONT_DIST_MM = 200 # Safe front distance threshold (200mm)
-FRONT_BRAKE_DIST_MM = 200 # Immediate front obstacle boundary (200mm)
+SAFE_FRONT_DIST_MM = 160 # Safe front distance threshold (160mm)
+FRONT_BRAKE_DIST_MM = 160 # Immediate front obstacle boundary (160mm)
 EMERGENCY_STOP_DIST_MM = 100 # Emergency collision stop threshold (100mm / 10cm - increased from 60mm)
 MAX_SHIFT_LATERAL_M = 0.10      # Allow the full correction needed to reach the 20cm wall target
-MAX_SHIFT_LONGITUDINAL_M = 0.20 # Allow the full correction needed to reach the 20cm wall target
+MAX_SHIFT_LONGITUDINAL_M = 0.20 # Allow the full correction needed to reach the 15cm wall target
 DEADBAND_M = 0.020              # Deadband tolerance (2.0cm) - ignores minor offsets to prevent jitter
 ENABLE_RECENTER = True              # เปิดระบบ Recenter ปรับกึ่งกลางช่อง
-ENABLE_LONGITUDINAL_RECENTER = True   # เปิดระบบ Centering หน้า-หลัง เพื่อจัดระยะห่างกำแพง 20cm (TARGET_WALL_DIST_MM)
+ENABLE_LONGITUDINAL_RECENTER = True   # เปิดระบบ Centering หน้า-หลัง เพื่อจัดระยะห่างกำแพงหน้า 15cm (TARGET_FRONT_WALL_DIST_MM)
 
 
 

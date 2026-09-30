@@ -1,8 +1,1 @@
 grid_x,grid_y,direction,color,color_label,shape,shape_label,area_px,image_path
-1,1,WEST,blue,น้ำเงิน,circle,วงกลม,30544,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_1_1_WEST_blue_circle_det_20260930_010656.jpg
-1,5,NORTH,yellow,เหลือง,horizontal,ผืนผ้าแนวนอน,30541,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_1_5_NORTH_yellow_horizontal_det_20260930_010741.jpg
-2,2,WEST,blue,น้ำเงิน,square,จัตุรัส,45730,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_2_2_WEST_blue_square_det_20260930_011106.jpg
-2,5,NORTH,yellow,เหลือง,square,จัตุรัส,2552,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_2_5_NORTH_yellow_square_det_20260930_011033.jpg
-3,2,EAST,blue,น้ำเงิน,horizontal,ผืนผ้าแนวนอน,36751,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_3_2_EAST_blue_horizontal_det_20260930_010848.jpg
-3,4,NORTH,green,เขียว,square,จัตุรัส,26214,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_3_4_NORTH_green_square_det_20260930_010825.jpg
-4,1,SOUTH,yellow,เหลือง,circle,วงกลม,25678,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_4_1_SOUTH_yellow_circle_det_20260930_010914.jpg
