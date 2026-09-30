@@ -382,6 +382,10 @@ def align_heading(ep_chassis, heading, sim_mode):
         state.initial_heading = heading
 
 
+def _front_is_clear(distance):
+    return math.isfinite(float(distance)) and float(distance) > FRONT_BRAKE_DIST_MM
+
+
 def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard=None, retry=1):
     """
     Move forward exactly 1 grid cell (0.60m) using smooth velocity control (drive_speed).
