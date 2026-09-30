@@ -193,7 +193,7 @@ slam-main/
 
 3. ติดตั้งไลบรารีที่จำเป็น:
    ```bash
-   pip install robomaster opencv-python pillow numpy matplotlib
+   pip install -r requirements.txt
    ```
 
 ---
