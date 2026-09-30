@@ -74,7 +74,7 @@ def evaluate_map_accuracy(gt_h_walls=None, gt_v_walls=None):
 def save_outputs(round_name=None, generate_plot=True):
     """Save trajectory CSV, walls CSV, signs CSV, and optionally high-res SLAM plot."""
     log_file = os.path.join(OUTPUT_DIR, "exploration_log.csv")
-    walls_file = os.path.join(OUTPUT_DIR, "walls_data.csv")
+    walls_file = os.path.join(OUTPUT_DIR, "wall_data.csv")
     signs_file = os.path.join(OUTPUT_DIR, "signs_data.csv")
     img_name = f"robot_trajectory_{round_name}.png" if round_name else "robot_trajectory.png"
     img_file = os.path.join(OUTPUT_DIR, img_name)
@@ -101,7 +101,7 @@ def save_outputs(round_name=None, generate_plot=True):
             ym = round((vy - 0.5) * config.GRID_SIZE_M, 3)
             w.writerow([vx, vy, xm, ym])
 
-    # Export foam walls coordinates for external analysis (both wall_data.csv and walls_data.csv)
+    # Export foam walls coordinates to results/wall_data.csv
     h_walls_to_save = set(state.detected_h_walls)
     v_walls_to_save = set(state.detected_v_walls)
     if not h_walls_to_save and not v_walls_to_save:
@@ -116,23 +116,13 @@ def save_outputs(round_name=None, generate_plot=True):
         except Exception:
             pass
 
-    wall_targets = [
-        walls_file,
-        os.path.join(OUTPUT_DIR, "wall_data.csv"),
-        os.path.join(config.CODE_DIR, "wall_data.csv"),
-        os.path.join(config.CODE_DIR, "walls_data.csv"),
-    ]
-    for wf in wall_targets:
-        try:
-            with open(wf, "w", newline="", encoding="utf-8") as f:
-                w = csv.writer(f)
-                w.writerow(["type", "x", "y"])
-                for wx, wy in sorted(h_walls_to_save):
-                    w.writerow(["H", wx, wy])
-                for wx, wy in sorted(v_walls_to_save):
-                    w.writerow(["V", wx, wy])
-        except Exception:
-            pass
+    with open(walls_file, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["type", "x", "y"])
+        for wx, wy in sorted(h_walls_to_save):
+            w.writerow(["H", wx, wy])
+        for wx, wy in sorted(v_walls_to_save):
+            w.writerow(["V", wx, wy])
 
     with open(signs_file, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
