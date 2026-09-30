@@ -163,6 +163,10 @@ def save_outputs(round_name=None, generate_plot=True):
     if not generate_plot:
         return
 
+    import importlib.util
+    if importlib.util.find_spec("matplotlib") is None:
+        return
+
     try:
         # pyrefly: ignore [missing-import]
         import matplotlib
@@ -422,10 +426,8 @@ def save_outputs(round_name=None, generate_plot=True):
                 if os.path.abspath(src) != os.path.abspath(dst_code):
                     shutil.copy2(src, dst_code)
 
-        saved_list = ", ".join(sorted(set(target_img_names)))
-        print(f"บันทึกไฟล์ภาพแผนที่ผลลัพธ์: {saved_list} ไว้ที่: {results_dir}")
-    except Exception as e:
-        print(f"ไม่สามารถบันทึกรูปภาพได้: {e}")
+    except Exception:
+        pass
 
 
 def re_evaluate_from_saved():
