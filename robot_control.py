@@ -363,9 +363,7 @@ def align_heading(ep_chassis, heading, sim_mode):
         if not ep_chassis.move(x=0, y=0, z=round(-yaw_error, 1),
                                z_speed=ROT_SPEED).wait_for_completed(timeout=2.5):
             ep_chassis.drive_speed(x=0, y=0, z=0)
-            state.stop_requested = True
-            return
-        time.sleep(0.10)
+            time.sleep(0.10)
 
     # One short fine-tune pass, matching the existing turn controller.
     yaw_error = _normalize_angle(target_yaw - state.current_yaw)
@@ -373,9 +371,7 @@ def align_heading(ep_chassis, heading, sim_mode):
         if not ep_chassis.move(x=0, y=0, z=round(-yaw_error, 1),
                                z_speed=ROT_SPEED).wait_for_completed(timeout=2.5):
             ep_chassis.drive_speed(x=0, y=0, z=0)
-            state.stop_requested = True
-            return
-        time.sleep(0.10)
+            time.sleep(0.10)
 
     stop_and_settle(ep_chassis, sim_mode, settle_s=0.20)
     final_error = _normalize_angle(target_yaw - state.current_yaw)
@@ -386,10 +382,10 @@ def align_heading(ep_chassis, heading, sim_mode):
         state.initial_heading = heading
 
 
-def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard=None):
+def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard=None, retry=1):
     """
     Move forward exactly 1 grid cell (0.60m) using smooth velocity control (drive_speed).
-    Uses tight time-distance coupling and front-wall proximity braking to completely
+    Uses tight time-distance coupling, robust stall grace periods, and front-wall proximity braking to completely
     prevent overshooting into walls.
     """
     if sim_mode:
@@ -420,9 +416,8 @@ def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard
     # odometry sample after braking. A short target accumulates a large pose
     # error over a multi-cell route.
     target_dist = config.GRID_SIZE_M
-    # Allow time for acceleration and encoder callbacks, while keeping a firm
-    # upper bound. Cell advancement still requires measured odometry progress.
-    max_duration = (target_dist / SPEED) + 0.80
+    # Allow ample time for acceleration and encoder callbacks while keeping a firm bound.
+    max_duration = (target_dist / SPEED) + 1.80
     # Hold the heading measured after the caller's cardinal alignment. Side
     # IR sensors must not steer the robot sideways: that pulls it off the grid.
     heading_target_yaw = state.current_yaw
@@ -454,9 +449,12 @@ def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard
         if traveled >= last_progress_distance + 0.005:
             last_progress_distance = traveled
             last_progress_time = time.time()
-        elif elapsed > 0.30 and time.time() - last_progress_time > 0.50:
+        elif elapsed > 1.20 and time.time() - last_progress_time > 1.20:
             odometry_stalled = True
             break
+        elif elapsed > 0.40 and traveled < 0.005:
+            # Re-assert forward speed command in case initial CAN bus packet ramp was sluggish
+            ep_chassis.drive_speed(x=SPEED, y=0, z=heading_correction())
 
         # 1. Emergency collision stop threshold (increased slightly from 60mm to EMERGENCY_STOP_DIST_MM)
         if not math.isfinite(float(state.current_distance)) or state.current_distance <= 30:
@@ -539,6 +537,18 @@ def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard
         print(f"⚠ หยุดฉุกเฉิน! กำแพงข้างหน้า ({state.current_distance:.0f}mm < 60mm)")
     if not move_completed:
         print(f"[MOVE INCOMPLETE] refusing to advance the map cell (traveled={traveled*100:.1f}cm)")
+
+    # Automatic recovery retry: if move didn't complete and odometry stalled near start with clear front, retry once
+    if not move_completed and (odometry_stalled or traveled < 0.05) and not emergency_stop and not state.stop_requested and retry > 0:
+        if _front_is_clear(state.current_distance):
+            if dashboard:
+                dashboard.log("⚠️ ล้อหมุนไม่ออกชั่วคราว (Odometry start lag) -> กำลังลองเคลื่อนที่ใหม่อีกครั้ง (Auto-retry)...")
+            stop_and_settle(ep_chassis, sim_mode, settle_s=0.20)
+            # Give a brief nudge forward to overcome static wheel friction
+            ep_chassis.drive_speed(x=SPEED, y=0, z=0)
+            time.sleep(0.12)
+            return move_one_cell(ep_chassis, sim_mode, heading=heading, returning=returning, dashboard=dashboard, retry=retry - 1)
+
     return move_completed
 
 

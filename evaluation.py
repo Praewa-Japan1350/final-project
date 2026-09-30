@@ -318,7 +318,7 @@ def save_outputs(round_name=None, generate_plot=True):
             ax.plot(tx[-1], ty[-1], marker="*", color="#ffffff", markersize=6, zorder=12)
             ax.text(
                 tx[-1], ty[-1] + 0.28, "END", color="#ffffff", fontsize=7.5,
-                fontweight="heavy", ha="center", va="bottom",
+                fontweight="bold", ha="center", va="bottom",
                 bbox=dict(boxstyle="round,pad=0.25", facecolor=end_col, edgecolor="none", alpha=0.95),
                 zorder=13,
             )
@@ -368,7 +368,7 @@ def save_outputs(round_name=None, generate_plot=True):
         if has_hostage:
             legend_elements.append(
                 Line2D([0], [0], marker="*", color="w", markerfacecolor="#f59e0b",
-                       markeredgecolor="#dc2626", markersize=9.0, label="Hostage (ตัวประกัน ⭐)")
+                       markeredgecolor="#dc2626", markersize=9.0, label="Hostage (Protected)")
             )
 
         legend = ax.legend(

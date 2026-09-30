@@ -144,8 +144,8 @@ def find_path_to_nearest_unvisited(start, visited, current_heading=None):
     while open_set:
         f, _cnt, curr, curr_heading = heapq.heappop(open_set)
 
-        # Goal: ช่องที่เปิดแล้ว (discovered) แต่ยังไม่ได้เยี่ยมชม (not visited)
-        if curr not in visited and curr in state.discovered_cells:
+        # Goal: ช่องที่ยังไม่ได้เยี่ยมชม (Unvisited frontier cell ที่เข้าถึงได้ผ่านทางเปิด)
+        if curr not in visited:
             path = []
             key = (curr, curr_heading)
             while key is not None:
@@ -153,6 +153,7 @@ def find_path_to_nearest_unvisited(start, visited, current_heading=None):
                 key = parent[key]
             return list(reversed(path))
 
+        # ขยายเส้นทางเฉพาะจากช่องที่เคยสำรวจกำแพงแล้ว (visited) เท่านั้น
         for d in DIRECTIONS:
             if is_wall_between(curr, d):
                 continue
@@ -185,7 +186,7 @@ def _bfs_nearest_unvisited(start, visited):
     while queue:
         curr = queue.popleft()
 
-        if curr not in visited and curr in state.discovered_cells:
+        if curr not in visited:
             path = []
             c = curr
             while c is not None:

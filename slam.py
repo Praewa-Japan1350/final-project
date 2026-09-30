@@ -253,7 +253,12 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
                         f"Target route stopped at {position}: {state.last_move_reason}, "
                         f"ToF {front_dist:.0f}mm, moved {state.last_move_distance_m * 100:.1f}cm."
                     )
-                state.stop_requested = True
+                # Mark blocked edge so A* reroutes to next target instead of cancelling entire round
+                x, y = position
+                if heading == "NORTH": state.detected_h_walls.add((x, y))
+                elif heading == "SOUTH": state.detected_h_walls.add((x, y - 1))
+                elif heading == "EAST": state.detected_v_walls.add((x, y))
+                elif heading == "WEST": state.detected_v_walls.add((x - 1, y))
                 break
             position = next_cell
             step += 1
@@ -694,11 +699,25 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                         position, heading, step,
                         f"Position synchronized from odometry: {position}",
                     )
-                # A wall/emergency brake is a completed cell observation, not
-                # a mission failure. Continue surveying from the measured cell;
-                # stop only when pose data are invalid or a non-wall move fails.
+                # A non-obstacle move stop (e.g. odometry stall or timeout) is not a mission failure.
+                # Do NOT terminate the exploration run! Keep the robot surveying from its measured position,
+                # mark this edge as impassable so pathfinding will navigate around it to reach
+                # all remaining unvisited cells in the maze.
                 if not obstacle_stop and not crossed_into_next_cell:
-                    state.stop_requested = True
+                    x, y = position
+                    if heading == "NORTH":
+                        state.detected_h_walls.add((x, y))
+                    elif heading == "SOUTH":
+                        state.detected_h_walls.add((x, y - 1))
+                    elif heading == "EAST":
+                        state.detected_v_walls.add((x, y))
+                    elif heading == "WEST":
+                        state.detected_v_walls.add((x - 1, y))
+                    if dashboard:
+                        dashboard.log(
+                            f"⚠️ เดินหน้าไม่สำเร็จ ({state.last_move_reason}) "
+                            f"-> บันทึกสิ่งกีดขวาง และคำนวณเส้นทางอื่นเพื่อสำรวจช่องที่เหลือให้ครบทั้งแมพ"
+                        )
 
             step += 1
 
