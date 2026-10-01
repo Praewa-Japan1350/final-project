@@ -1,0 +1,30 @@
+{
+  "version": 4,
+  "grid_size_m": 0.6,
+  "grid_width": 6,
+  "grid_height": 6,
+  "start": [
+    2,
+    4,
+    "NORTH"
+  ],
+  "last_position": [
+    2,
+    4
+  ],
+  "last_heading": "NORTH",
+  "step": 0,
+  "h_walls": [],
+  "v_walls": [],
+  "discovered": [
+    [
+      2,
+      4
+    ]
+  ],
+  "visited": [],
+  "fired_targets": [],
+  "targets": [],
+  "color_scans": [],
+  "trajectory": []
+}

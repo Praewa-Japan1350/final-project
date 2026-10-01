@@ -97,43 +97,48 @@ def save_outputs(round_name=None, generate_plot=True):
         round_key = norm_round if norm_round else "full"
         round_desc = "MAZE RECONSTRUCTION & TARGET LOCALIZATION"
 
-    log_file = os.path.join(OUTPUT_DIR, "exploration_log.csv")
-    walls_file = os.path.join(OUTPUT_DIR, "wall_data.csv")
-    signs_file = os.path.join(OUTPUT_DIR, "signs_data.csv")
+    log_files = [os.path.join(OUTPUT_DIR, "exploration_log.csv")]
+    walls_files = [os.path.join(OUTPUT_DIR, "wall_data.csv")]
+    signs_files = [os.path.join(OUTPUT_DIR, "signs_data.csv")]
+    traj_files = [os.path.join(OUTPUT_DIR, "trajectory_log.csv")]
+    visited_files = [os.path.join(OUTPUT_DIR, "visited_cells.csv")]
+
+    if round_key and round_key != "full":
+        log_files.append(os.path.join(OUTPUT_DIR, f"exploration_log_{round_key}.csv"))
+        walls_files.append(os.path.join(OUTPUT_DIR, f"wall_data_{round_key}.csv"))
+        signs_files.append(os.path.join(OUTPUT_DIR, f"signs_data_{round_key}.csv"))
+        traj_files.append(os.path.join(OUTPUT_DIR, f"trajectory_log_{round_key}.csv"))
+        visited_files.append(os.path.join(OUTPUT_DIR, f"visited_cells_{round_key}.csv"))
+
     img_name = f"robot_trajectory_{round_key}.png" if round_key != "full" else "robot_trajectory.png"
     img_file = os.path.join(OUTPUT_DIR, img_name)
-    traj_file = os.path.join(OUTPUT_DIR, "trajectory_log.csv")
-    visited_file = os.path.join(OUTPUT_DIR, "visited_cells.csv")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     fields = ["step", "timestamp", "grid_x", "grid_y", "x_m", "y_m", "heading", "tof_mm"]
-    with open(log_file, "w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=fields)
-        writer.writeheader()
-        writer.writerows([{key: item[key] for key in fields} for item in state.trajectory])
+    traj_rows = [{key: item[key] for key in fields} for item in state.trajectory]
 
-    with open(traj_file, "w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=fields)
-        writer.writeheader()
-        writer.writerows([{key: item[key] for key in fields} for item in state.trajectory])
-
-    # Save dedicated per-round trajectory CSV
-    if is_r1 or is_r2:
-        round_traj_file = os.path.join(OUTPUT_DIR, f"trajectory_log_{round_key}.csv")
-        with open(round_traj_file, "w", newline="", encoding="utf-8") as file:
+    for lf in log_files:
+        with open(lf, "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=fields)
             writer.writeheader()
-            writer.writerows([{key: item[key] for key in fields} for item in state.trajectory])
+            writer.writerows(traj_rows)
 
-    with open(visited_file, "w", newline="", encoding="utf-8") as file:
-        w = csv.writer(file)
-        w.writerow(["grid_x", "grid_y", "x_m", "y_m"])
-        for vx, vy in sorted(state.visited_cells):
-            xm = round((vx - 0.5) * config.GRID_SIZE_M, 3)
-            ym = round((vy - 0.5) * config.GRID_SIZE_M, 3)
-            w.writerow([vx, vy, xm, ym])
+    for tf in traj_files:
+        with open(tf, "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(traj_rows)
 
-    # Export foam walls coordinates to results/wall_data.csv
+    for vf in visited_files:
+        with open(vf, "w", newline="", encoding="utf-8") as file:
+            w = csv.writer(file)
+            w.writerow(["grid_x", "grid_y", "x_m", "y_m"])
+            for vx, vy in sorted(state.visited_cells):
+                xm = round((vx - 0.5) * config.GRID_SIZE_M, 3)
+                ym = round((vy - 0.5) * config.GRID_SIZE_M, 3)
+                w.writerow([vx, vy, xm, ym])
+
+    # Export foam walls coordinates
     h_walls_to_save = set(state.detected_h_walls)
     v_walls_to_save = set(state.detected_v_walls)
     if not h_walls_to_save and not v_walls_to_save:
@@ -148,27 +153,45 @@ def save_outputs(round_name=None, generate_plot=True):
         except Exception:
             pass
 
-    with open(walls_file, "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["type", "x", "y"])
-        for wx, wy in sorted(h_walls_to_save):
-            w.writerow(["H", wx, wy])
-        for wx, wy in sorted(v_walls_to_save):
-            w.writerow(["V", wx, wy])
+    for wf in walls_files:
+        with open(wf, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["type", "x", "y"])
+            for wx, wy in sorted(h_walls_to_save):
+                w.writerow(["H", wx, wy])
+            for wx, wy in sorted(v_walls_to_save):
+                w.writerow(["V", wx, wy])
 
-    with open(signs_file, "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["grid_x", "grid_y", "direction", "color", "color_label", "shape", "shape_label", "area_px", "image_path"])
-        for (cell, direction), signs in sorted(state.detected_signs.items()):
-            for sign in signs:
-                is_hostage = sign.get("is_hostage") or sign.get("shape") == "hostage"
-                s_shape = "hostage" if is_hostage else sign["shape"]
-                s_label = "ตัวประกัน (ห้ามยิง)" if is_hostage else sign.get("shape_label", s_shape)
-                w.writerow([
-                    cell[0], cell[1], direction, sign["color"], sign.get("label", ""),
-                    s_shape, s_label, round(sign.get("area", 0)),
-                    sign.get("image_path", ""),
-                ])
+    signs_rows = []
+    for (cell, direction), signs in sorted(state.detected_signs.items()):
+        for sign in signs:
+            is_hostage = sign.get("is_hostage") or sign.get("shape") == "hostage"
+            s_shape = "hostage" if is_hostage else sign["shape"]
+            s_label = "ตัวประกัน (ห้ามยิง)" if is_hostage else sign.get("shape_label", s_shape)
+            signs_rows.append([
+                cell[0], cell[1], direction, sign["color"], sign.get("label", ""),
+                s_shape, s_label, round(sign.get("area", 0)),
+                sign.get("image_path", ""),
+            ])
+
+    for sf in signs_files:
+        with open(sf, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["grid_x", "grid_y", "direction", "color", "color_label", "shape", "shape_label", "area_px", "image_path"])
+            w.writerows(signs_rows)
+
+    # Also backup mission_map and mission_log per round
+    if round_key and round_key != "full":
+        try:
+            import shutil
+            map_src = os.path.join(config.CODE_DIR, "maps", "mission_map.json")
+            if os.path.exists(map_src):
+                shutil.copy2(map_src, os.path.join(config.CODE_DIR, "maps", f"mission_map_{round_key}.json"))
+            log_src = os.path.join(OUTPUT_DIR, "mission_log.txt")
+            if os.path.exists(log_src):
+                shutil.copy2(log_src, os.path.join(OUTPUT_DIR, f"mission_log_{round_key}.txt"))
+        except Exception:
+            pass
 
     if not generate_plot:
         return
@@ -416,11 +439,11 @@ def save_outputs(round_name=None, generate_plot=True):
         # Collect all image names to save
         target_img_names = ["robot_trajectory.png", "final_slam_map.png"]
         if is_r1:
-            target_img_names.append("robot_trajectory_round1.png")
+            target_img_names.extend(["robot_trajectory_round1.png", "final_slam_map_round1.png"])
         elif is_r2:
-            target_img_names.append("robot_trajectory_round2.png")
+            target_img_names.extend(["robot_trajectory_round2.png", "final_slam_map_round2.png"])
         elif round_key and round_key != "full":
-            target_img_names.append(f"robot_trajectory_{round_key}.png")
+            target_img_names.extend([f"robot_trajectory_{round_key}.png", f"final_slam_map_{round_key}.png"])
 
         for iname in set(target_img_names):
             fig.savefig(os.path.join(results_dir, iname), dpi=300, facecolor=fig_bg)
@@ -428,15 +451,21 @@ def save_outputs(round_name=None, generate_plot=True):
         plt.close(fig)
 
         import shutil
-        for fname in ["exploration_log.csv", "trajectory_log.csv", "visited_cells.csv", "wall_data.csv", "signs_data.csv"]:
-            src = os.path.join(OUTPUT_DIR, fname)
-            if os.path.exists(src):
-                dst_results = os.path.join(results_dir, fname)
-                if os.path.abspath(src) != os.path.abspath(dst_results):
-                    shutil.copy2(src, dst_results)
-                dst_code = os.path.join(code_dir, fname)
-                if os.path.abspath(src) != os.path.abspath(dst_code):
-                    shutil.copy2(src, dst_code)
+        all_csv_bases = ["exploration_log", "trajectory_log", "visited_cells", "wall_data", "signs_data"]
+        for base in all_csv_bases:
+            suffixes = [""]
+            if round_key and round_key != "full":
+                suffixes.append(f"_{round_key}")
+            for suffix in suffixes:
+                fname = f"{base}{suffix}.csv"
+                src = os.path.join(OUTPUT_DIR, fname)
+                if os.path.exists(src):
+                    dst_results = os.path.join(results_dir, fname)
+                    if os.path.abspath(src) != os.path.abspath(dst_results):
+                        shutil.copy2(src, dst_results)
+                    dst_code = os.path.join(code_dir, fname)
+                    if os.path.abspath(src) != os.path.abspath(dst_code):
+                        shutil.copy2(src, dst_code)
 
     except Exception:
         pass

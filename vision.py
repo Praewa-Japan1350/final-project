@@ -11,6 +11,62 @@ import numpy as np
 # Keep image analysis from taking every CPU core away from the Tk interface.
 cv2.setNumThreads(2)
 
+
+def patch_robomaster_video():
+    """
+    Prevent RoboMaster SDK H.264 video decoder crashes (msvcrt.dll access violation 0xc0000005).
+    Root cause: When LiveView._video_frame_queue (size 64) is full, LiveView._video_decoder_task blocks
+    for 2s on put(). This causes StreamConnection._sock_queue (size 32) to overflow and drop TCP packets.
+    Truncated/corrupted H.264 packets fed to avcodec-58.dll result in an uncatchable C-level access violation.
+    Fix:
+      1. Replace _video_frame_queue with a sliding non-blocking queue that drops oldest frame when full.
+      2. Increase StreamConnection._sock_queue buffer to 128 to absorb network jitter without dropping.
+      3. Wrap _h264_decode in safe exception handling to ignore any malformed network frames.
+    """
+    try:
+        import robomaster.media as rm
+        import robomaster.conn as rc
+        import queue
+
+        if getattr(rm, "_custom_patches_applied", False):
+            return
+
+        class SafeVideoFrameQueue(queue.Queue):
+            def put(self, item, block=True, timeout=None):
+                while self.maxsize > 0 and self.qsize() >= self.maxsize:
+                    try:
+                        self.get_nowait()
+                    except Exception:
+                        break
+                super().put(item, block=False)
+
+        orig_liveview_init = rm.LiveView.__init__
+        def patched_liveview_init(self, robot):
+            orig_liveview_init(self, robot)
+            self._video_frame_queue = SafeVideoFrameQueue(32)
+        rm.LiveView.__init__ = patched_liveview_init
+
+        orig_conn_init = rc.StreamConnection.__init__
+        def patched_conn_init(self):
+            orig_conn_init(self)
+            self._sock_queue = queue.Queue(128)
+        rc.StreamConnection.__init__ = patched_conn_init
+
+        orig_h264_decode = rm.LiveView._h264_decode
+        def patched_h264_decode(self, data):
+            try:
+                return orig_h264_decode(self, data)
+            except Exception:
+                return []
+        rm.LiveView._h264_decode = patched_h264_decode
+
+        rm._custom_patches_applied = True
+    except Exception:
+        pass
+
+
+patch_robomaster_video()
+
 MIN_AREA = 2500
 # Reject weakly colored regions such as floor glare and reflections even when
 # their shape happens to resemble a sign.
@@ -19,7 +75,7 @@ MIN_COLOR_PURITY = 0.72
 # Cap both total area and a single dimension relative to the detection window.
 MAX_OBJECT_AREA_RATIO = 0.40
 MAX_OBJECT_DIMENSION_RATIO = 0.75
-MIN_OBJECT_DIMENSION_PX = 35
+MIN_OBJECT_DIMENSION_PX = 40
 SQUARE_RATIO = 0.75
 COLORS = {
     "red": {
@@ -395,8 +451,10 @@ class CameraFrameReader:
                 self._stop.wait(0.05)
                 continue
             with self._lock:
-                self._frame = frame.copy()
+                self._frame = frame
                 self._frame_id += 1
+            # Brief yield to keep CPU cool and prevent starvation of Tkinter GUI thread
+            self._stop.wait(0.015)
 
     def latest(self):
         with self._lock:

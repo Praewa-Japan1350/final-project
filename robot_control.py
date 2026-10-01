@@ -44,7 +44,7 @@ from config import (
     adjacent,
     in_bounds,
 )
-from navigation import is_wall_distance, sim_has_wall_between
+from navigation import is_wall_distance, is_wall_between, sim_has_wall_between
 import state
 
 BLASTER_PITCH_UP_DEG = getattr(config, "BLASTER_PITCH_UP_DEG", 8.0)
@@ -417,6 +417,47 @@ def align_heading(ep_chassis, heading, sim_mode):
         state.initial_heading = heading
 
 
+def get_current_yaw_error(heading):
+    """Return the absolute yaw error (degrees) between current orientation and target heading."""
+    if state.initial_yaw is None or heading not in DIRECTIONS:
+        return 0.0
+    heading_offsets = {"NORTH": 0.0, "EAST": 90.0, "SOUTH": 180.0, "WEST": -90.0}
+    start_offset = heading_offsets.get(state.initial_heading, 0.0)
+    target_yaw = _normalize_angle(state.initial_yaw + heading_offsets[heading] - start_offset)
+    return abs(_normalize_angle(target_yaw - state.current_yaw))
+
+
+def read_walls_for_recenter(ep_gimbal, position, current_heading, sim_mode):
+    """
+    Fast ToF reading for known walls around the cell (NO color scan, NO image processing).
+    Used to quickly recenter when the robot starts getting skewed on already visited cells.
+    """
+    readings = {}
+    h_idx = DIRECTIONS.index(current_heading)
+    front_dir = current_heading
+    right_dir = DIRECTIONS[(h_idx + 1) % 4]
+    left_dir = DIRECTIONS[(h_idx - 1) % 4]
+
+    dirs_to_check = []
+    if is_wall_between(position, front_dir):
+        dirs_to_check.append(front_dir)
+    if is_wall_between(position, right_dir):
+        dirs_to_check.append(right_dir)
+    if is_wall_between(position, left_dir):
+        dirs_to_check.append(left_dir)
+
+    for target_dir in dirs_to_check:
+        if state.stop_requested:
+            break
+        dist = read_distance_with_gimbal(ep_gimbal, position, current_heading, target_dir, sim_mode, gimbal_pitch=3)
+        readings[target_dir] = dist
+
+    if ep_gimbal and not sim_mode:
+        _safe_wait(ep_gimbal.recenter(), timeout=2.0)
+
+    return readings
+
+
 def _front_is_clear(distance):
     d = float(distance)
     if math.isnan(d) or (0 <= d <= FRONT_BRAKE_DIST_MM):
@@ -548,11 +589,12 @@ def move_one_cell(ep_chassis, sim_mode, heading=None, returning=False, dashboard
 
     reached_grid_step = traveled >= config.GRID_SIZE_M - 0.04
     reached_braking_zone_at_cell = (
-        front_wall_reached and traveled >= config.GRID_SIZE_M - 0.08
+        front_wall_reached and traveled >= config.GRID_SIZE_M - 0.10
     )
+    has_entered_cell = (traveled >= config.GRID_SIZE_M - 0.08)
     move_completed = (
-        not emergency_stop and not state.stop_requested and
-        (reached_grid_step or reached_braking_zone_at_cell)
+        not state.stop_requested and
+        (reached_grid_step or reached_braking_zone_at_cell or has_entered_cell)
     )
     state.last_move_distance_m = traveled
     if emergency_stop and tof_invalid:
@@ -1173,15 +1215,22 @@ def recenter_in_cell(ep_chassis, ep_gimbal, readings, position, current_heading,
 
     # 1. Lateral adjustment (Chassis Y: +y = Right, -y = Left in RoboMaster SDK)
     chassis_y_mm = 0.0
+    lateral_info = ""
     if wall_left and wall_right:
-        # Equalize the clearance to opposing walls.
-        chassis_y_mm = (dist_right - dist_left) / 2.0
+        # เปรียบเทียบกำแพงทั้งสองฝั่ง (ซ้ายและขวา) แล้วปรับให้อยู่กึ่งกลาง (ห่างกำแพงเท่ากันทั้งสองฝั่ง ~25cm)
+        diff_lr = dist_right - dist_left
+        chassis_y_mm = diff_lr / 2.0
+        lateral_info = f"[เปรียบเทียบกำแพง ซ้าย={dist_left:.0f}mm, ขวา={dist_right:.0f}mm -> ปรับสมดุลกึ่งกลาง]"
     elif wall_left:
-        # +y moves right: hold a 20cm gap from a single left wall.
+        # มีกำแพงเฉพาะฝั่งซ้าย: ปรับให้อยู่ห่างกำแพงซ้าย (TARGET_LATERAL_WALL_DIST_MM)
         chassis_y_mm = TARGET_LATERAL_WALL_DIST_MM - dist_left
+        lateral_info = f"[กำแพงซ้าย={dist_left:.0f}mm -> ปรับห่าง {TARGET_LATERAL_WALL_DIST_MM/10:.0f}cm (เป้า={TARGET_LATERAL_WALL_DIST_MM}mm)]"
     elif wall_right:
-        # +y moves right: hold a 20cm gap from a single right wall.
+        # มีกำแพงเฉพาะฝั่งขวา: ปรับให้อยู่ห่างกำแพงขวา (TARGET_LATERAL_WALL_DIST_MM)
         chassis_y_mm = dist_right - TARGET_LATERAL_WALL_DIST_MM
+        lateral_info = f"[กำแพงขวา={dist_right:.0f}mm -> ปรับห่าง {TARGET_LATERAL_WALL_DIST_MM/10:.0f}cm (เป้า={TARGET_LATERAL_WALL_DIST_MM}mm)]"
+    else:
+        lateral_info = "[ไม่มีกำแพงด้านข้าง]"
 
     # 2. Longitudinal adjustment (Chassis X: +x = Forward, -x = Backward)
     # Use front/rear ToF to set the robot 15 cm from a detected wall when enabled.
@@ -1209,9 +1258,10 @@ def recenter_in_cell(ep_chassis, ep_gimbal, readings, position, current_heading,
 
     if chassis_x == 0.0 and chassis_y == 0.0:
         align_heading(ep_chassis, current_heading, sim_mode)
+        settled_msg = f"-> Recenter: กึ่งกลางช่องได้ระดับแล้ว {lateral_info}"
         if dashboard:
-            dashboard.log("-> Recenter: กึ่งกลางช่องได้ระดับแล้ว")
-        print("-> Recenter: กึ่งกลางช่องได้ระดับแล้ว")
+            dashboard.log(settled_msg)
+        print(settled_msg)
         return 0.0, 0.0
 
     # Convert chassis (x, y) back to world (shift_x, shift_y) for reporting:
@@ -1226,7 +1276,7 @@ def recenter_in_cell(ep_chassis, ep_gimbal, readings, position, current_heading,
     else:  # WEST
         shift_x_m, shift_y_m = -chassis_x, chassis_y
 
-    msg = f"-> Recenter: ปรับจุดกึ่งกลาง (dx={shift_x_m*100:+.1f}cm, dy={shift_y_m*100:+.1f}cm)"
+    msg = f"-> Recenter: ปรับจุดกึ่งกลาง (dx={shift_x_m*100:+.1f}cm, dy={shift_y_m*100:+.1f}cm) {lateral_info}"
     if dashboard:
         dashboard.log(msg)
     print(msg)

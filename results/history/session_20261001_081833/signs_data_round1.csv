@@ -1,0 +1,15 @@
+grid_x,grid_y,direction,color,color_label,shape,shape_label,area_px,image_path
+1,1,WEST,green,เขียว,vertical,ผืนผ้าแนวตั้ง,43364,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_1_1_WEST_green_vertical_det_20261001_073943.jpg
+1,6,NORTH,yellow,เหลือง,circle,วงกลม,18946,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_1_6_NORTH_yellow_circle_det_20261001_074052.jpg
+2,1,WEST,blue,น้ำเงิน,circle,วงกลม,45070,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_2_1_WEST_blue_circle_det_20261001_074400.jpg
+2,3,SOUTH,yellow,เหลือง,circle,วงกลม,21216,c:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_2_3_SOUTH_yellow_circle_det_20261001_075834.jpg
+3,1,SOUTH,yellow,เหลือง,square,จัตุรัส,72008,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_3_1_SOUTH_yellow_square_det_20261001_074348.jpg
+4,1,SOUTH,red,แดง,circle,วงกลม,17578,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_4_1_SOUTH_red_circle_det_20261001_074319.jpg
+4,1,SOUTH,yellow,เหลือง,circle,วงกลม,15885,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_4_1_SOUTH_yellow_circle_det_20261001_074319.jpg
+5,1,WEST,red,แดง,vertical,ผืนผ้าแนวตั้ง,27080,c:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_5_1_WEST_red_vertical_det_20261001_075513.jpg
+6,1,SOUTH,blue,น้ำเงิน,circle,วงกลม,20284,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_1_SOUTH_blue_circle_det_20261001_074602.jpg
+6,3,EAST,green,เขียว,square,จัตุรัส,27170,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_3_EAST_green_square_det_20261001_074524.jpg
+6,4,EAST,red,แดง,horizontal,ผืนผ้าแนวนอน,36969,c:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_4_EAST_red_horizontal_det_20261001_075611.jpg
+6,6,NORTH,green,เขียว,vertical,ผืนผ้าแนวตั้ง,9042,c:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_6_NORTH_green_vertical_det_20261001_075644.jpg
+6,6,NORTH,green,เขียว,vertical,ผืนผ้าแนวตั้ง,12387,c:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_6_NORTH_green_vertical_det_20261001_075644.jpg
+6,6,NORTH,yellow,เหลือง,horizontal,ผืนผ้าแนวนอน,4721,c:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_6_NORTH_yellow_horizontal_det_20261001_075644.jpg

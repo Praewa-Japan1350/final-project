@@ -6,6 +6,8 @@ Redirects to code/slam.py for modular execution.
 Usage:
     python run.py --sim
     python run.py
+    python run.py --resume
+    python run.py --sim --resume
     python run.py --sim --no-dashboard --start-x 1 --start-y 1 --start-heading NORTH
 """
 

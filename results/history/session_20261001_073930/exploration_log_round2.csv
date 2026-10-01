@@ -1,0 +1,2 @@
+step,timestamp,grid_x,grid_y,x_m,y_m,heading,tof_mm
+0,1790814605.2,1,1,0.3,0.3,NORTH,9999

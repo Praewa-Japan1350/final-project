@@ -1,0 +1,3569 @@
+{
+  "version": 4,
+  "grid_size_m": 0.6,
+  "grid_width": 6,
+  "grid_height": 6,
+  "start": [
+    3,
+    6,
+    "WEST"
+  ],
+  "last_position": [
+    5,
+    5
+  ],
+  "last_heading": "SOUTH",
+  "step": 51,
+  "h_walls": [
+    [
+      1,
+      6
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      0
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      4,
+      0
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      0
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      0
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "v_walls": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      0,
+      4
+    ],
+    [
+      0,
+      5
+    ],
+    [
+      0,
+      6
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      4,
+      1
+    ],
+    [
+      4,
+      2
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      6,
+      1
+    ],
+    [
+      6,
+      2
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      6,
+      5
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "discovered": [
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      1
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      4,
+      1
+    ],
+    [
+      4,
+      2
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      4,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      1
+    ],
+    [
+      5,
+      2
+    ],
+    [
+      5,
+      3
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      1
+    ],
+    [
+      6,
+      2
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      6,
+      5
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "visited": [
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      1
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      4,
+      1
+    ],
+    [
+      4,
+      2
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      4,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      1
+    ],
+    [
+      5,
+      2
+    ],
+    [
+      5,
+      3
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      1
+    ],
+    [
+      6,
+      2
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      6,
+      5
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "fired_targets": [
+    [
+      [
+        1,
+        1
+      ],
+      "green",
+      "vertical"
+    ],
+    [
+      [
+        4,
+        1
+      ],
+      "yellow",
+      "circle"
+    ],
+    [
+      [
+        2,
+        1
+      ],
+      "blue",
+      "circle"
+    ],
+    [
+      [
+        5,
+        1
+      ],
+      "red",
+      "vertical"
+    ],
+    [
+      [
+        5,
+        1
+      ],
+      "green",
+      "square"
+    ],
+    [
+      [
+        6,
+        3
+      ],
+      "green",
+      "square"
+    ],
+    [
+      [
+        4,
+        1
+      ],
+      "red",
+      "circle"
+    ],
+    [
+      [
+        1,
+        6
+      ],
+      "yellow",
+      "circle"
+    ],
+    [
+      [
+        6,
+        4
+      ],
+      "red",
+      "horizontal"
+    ],
+    [
+      [
+        5,
+        1
+      ],
+      "yellow",
+      "horizontal"
+    ],
+    [
+      [
+        3,
+        1
+      ],
+      "yellow",
+      "square"
+    ]
+  ],
+  "targets": [
+    {
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "WEST",
+      "signs": [
+        {
+          "color": "green",
+          "label": "เขียว",
+          "shape": "vertical",
+          "shape_label": "ผืนผ้าแนวตั้ง",
+          "area": 34582.0,
+          "size_px": [
+            168,
+            223
+          ],
+          "bbox": [
+            668,
+            272,
+            168,
+            223
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_1_1_WEST_green_vertical_det_20261001_081847.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "NORTH",
+      "signs": [
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "circle",
+          "shape_label": "วงกลม",
+          "area": 18699.0,
+          "size_px": [
+            158,
+            153
+          ],
+          "bbox": [
+            552,
+            214,
+            158,
+            153
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_1_6_NORTH_yellow_circle_det_20261001_082002.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "SOUTH",
+      "signs": [
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "circle",
+          "shape_label": "วงกลม",
+          "area": 39703.0,
+          "size_px": [
+            233,
+            219
+          ],
+          "bbox": [
+            748,
+            286,
+            233,
+            219
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_4_1_SOUTH_yellow_circle_det_20261001_082228.jpg"
+        },
+        {
+          "color": "red",
+          "label": "แดง",
+          "shape": "circle",
+          "shape_label": "วงกลม",
+          "area": 35929.0,
+          "size_px": [
+            224,
+            212
+          ],
+          "bbox": [
+            38,
+            298,
+            224,
+            212
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_4_1_SOUTH_red_circle_det_20261001_082228.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "SOUTH",
+      "signs": [
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 33790.0,
+          "size_px": [
+            201,
+            184
+          ],
+          "bbox": [
+            562,
+            272,
+            201,
+            184
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_3_1_SOUTH_yellow_square_det_20261001_082257.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "WEST",
+      "signs": [
+        {
+          "color": "blue",
+          "label": "น้ำเงิน",
+          "shape": "circle",
+          "shape_label": "วงกลม",
+          "area": 42154.5,
+          "size_px": [
+            238,
+            236
+          ],
+          "bbox": [
+            531,
+            274,
+            238,
+            236
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_2_1_WEST_blue_circle_det_20261001_082310.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "EAST",
+      "signs": [
+        {
+          "color": "green",
+          "label": "เขียว",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 47502.5,
+          "size_px": [
+            274,
+            217
+          ],
+          "bbox": [
+            38,
+            294,
+            274,
+            217
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_3_EAST_green_square_det_20261001_082433.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        5,
+        1
+      ],
+      "direction": "SOUTH",
+      "signs": [
+        {
+          "color": "red",
+          "label": "แดง",
+          "shape": "vertical",
+          "shape_label": "ผืนผ้าแนวตั้ง",
+          "area": 34943.0,
+          "size_px": [
+            212,
+            229
+          ],
+          "bbox": [
+            888,
+            289,
+            212,
+            229
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_5_1_SOUTH_red_vertical_det_20261001_082529.jpg"
+        },
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 2699.5,
+          "size_px": [
+            79,
+            51
+          ],
+          "bbox": [
+            510,
+            608,
+            79,
+            51
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_5_1_SOUTH_yellow_horizontal_det_20261001_082529.jpg"
+        },
+        {
+          "color": "green",
+          "label": "เขียว",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 33588.5,
+          "size_px": [
+            203,
+            185
+          ],
+          "bbox": [
+            463,
+            294,
+            203,
+            185
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_5_1_SOUTH_green_square_det_20261001_082529.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "EAST",
+      "signs": [
+        {
+          "color": "red",
+          "label": "แดง",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 98865.5,
+          "size_px": [
+            427,
+            261
+          ],
+          "bbox": [
+            204,
+            383,
+            427,
+            261
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_4_EAST_red_horizontal_det_20261001_082629.jpg"
+        }
+      ]
+    }
+  ],
+  "color_scans": [
+    {
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        1
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "green",
+          "shape": "vertical",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "green",
+          "shape": "vertical",
+          "area": 34582.0,
+          "size_px": [
+            168,
+            223
+          ],
+          "bbox": [
+            668,
+            272,
+            168,
+            223
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "green",
+          "shape": "vertical",
+          "area": 34594.0,
+          "size_px": [
+            168,
+            223
+          ],
+          "bbox": [
+            668,
+            272,
+            168,
+            223
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "green",
+          "shape": "vertical",
+          "area": 34604.0,
+          "size_px": [
+            169,
+            223
+          ],
+          "bbox": [
+            667,
+            272,
+            169,
+            223
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "green",
+          "shape": "vertical",
+          "area": 34525.5,
+          "size_px": [
+            169,
+            222
+          ],
+          "bbox": [
+            668,
+            273,
+            169,
+            222
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "green",
+          "shape": "vertical",
+          "area": 34533.5,
+          "size_px": [
+            169,
+            222
+          ],
+          "bbox": [
+            668,
+            273,
+            169,
+            222
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "green",
+          "shape": "vertical",
+          "area": 34528.0,
+          "size_px": [
+            169,
+            222
+          ],
+          "bbox": [
+            668,
+            273,
+            169,
+            222
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        2
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "yellow",
+          "shape": "square",
+          "votes": 1,
+          "confidence": 0.16666666666666666
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "square",
+          "area": 24595.0,
+          "size_px": [
+            204,
+            190
+          ],
+          "bbox": [
+            857,
+            508,
+            204,
+            190
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        3
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        4
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "yellow",
+          "shape": "circle",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 16605.0,
+          "size_px": [
+            155,
+            143
+          ],
+          "bbox": [
+            554,
+            249,
+            155,
+            143
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 18139.5,
+          "size_px": [
+            158,
+            148
+          ],
+          "bbox": [
+            552,
+            213,
+            158,
+            148
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 18738.0,
+          "size_px": [
+            158,
+            153
+          ],
+          "bbox": [
+            552,
+            214,
+            158,
+            153
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 18719.5,
+          "size_px": [
+            158,
+            154
+          ],
+          "bbox": [
+            552,
+            213,
+            158,
+            154
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 18699.0,
+          "size_px": [
+            158,
+            153
+          ],
+          "bbox": [
+            552,
+            214,
+            158,
+            153
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 18703.0,
+          "size_px": [
+            158,
+            153
+          ],
+          "bbox": [
+            552,
+            214,
+            158,
+            153
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        2
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "red",
+          "shape": "circle",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "circle",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 39753.0,
+          "size_px": [
+            234,
+            219
+          ],
+          "bbox": [
+            747,
+            286,
+            234,
+            219
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "red",
+          "shape": "circle",
+          "area": 36031.0,
+          "size_px": [
+            225,
+            212
+          ],
+          "bbox": [
+            38,
+            298,
+            225,
+            212
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 39705.0,
+          "size_px": [
+            233,
+            219
+          ],
+          "bbox": [
+            748,
+            286,
+            233,
+            219
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "red",
+          "shape": "circle",
+          "area": 35929.0,
+          "size_px": [
+            224,
+            212
+          ],
+          "bbox": [
+            38,
+            298,
+            224,
+            212
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 39703.0,
+          "size_px": [
+            233,
+            219
+          ],
+          "bbox": [
+            748,
+            286,
+            233,
+            219
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "red",
+          "shape": "circle",
+          "area": 35933.0,
+          "size_px": [
+            224,
+            212
+          ],
+          "bbox": [
+            38,
+            298,
+            224,
+            212
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 39656.0,
+          "size_px": [
+            234,
+            218
+          ],
+          "bbox": [
+            747,
+            287,
+            234,
+            218
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "red",
+          "shape": "circle",
+          "area": 35862.0,
+          "size_px": [
+            222,
+            212
+          ],
+          "bbox": [
+            38,
+            298,
+            222,
+            212
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 39644.5,
+          "size_px": [
+            234,
+            218
+          ],
+          "bbox": [
+            747,
+            287,
+            234,
+            218
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "red",
+          "shape": "circle",
+          "area": 35857.5,
+          "size_px": [
+            222,
+            213
+          ],
+          "bbox": [
+            38,
+            298,
+            222,
+            213
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "circle",
+          "area": 39682.0,
+          "size_px": [
+            234,
+            219
+          ],
+          "bbox": [
+            747,
+            287,
+            234,
+            219
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "red",
+          "shape": "circle",
+          "area": 35869.5,
+          "size_px": [
+            222,
+            212
+          ],
+          "bbox": [
+            38,
+            299,
+            222,
+            212
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        1
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        1
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "yellow",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "square",
+          "area": 33805.5,
+          "size_px": [
+            201,
+            184
+          ],
+          "bbox": [
+            562,
+            272,
+            201,
+            184
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "square",
+          "area": 33851.5,
+          "size_px": [
+            201,
+            185
+          ],
+          "bbox": [
+            562,
+            271,
+            201,
+            185
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "square",
+          "area": 33778.0,
+          "size_px": [
+            201,
+            184
+          ],
+          "bbox": [
+            562,
+            272,
+            201,
+            184
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "square",
+          "area": 33790.0,
+          "size_px": [
+            201,
+            184
+          ],
+          "bbox": [
+            562,
+            272,
+            201,
+            184
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "square",
+          "area": 33793.5,
+          "size_px": [
+            201,
+            184
+          ],
+          "bbox": [
+            561,
+            272,
+            201,
+            184
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "square",
+          "area": 33772.5,
+          "size_px": [
+            200,
+            184
+          ],
+          "bbox": [
+            562,
+            272,
+            200,
+            184
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "blue",
+          "shape": "circle",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "horizontal",
+          "votes": 1,
+          "confidence": 0.16666666666666666
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "blue",
+          "shape": "circle",
+          "area": 42154.5,
+          "size_px": [
+            238,
+            236
+          ],
+          "bbox": [
+            531,
+            274,
+            238,
+            236
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "blue",
+          "shape": "circle",
+          "area": 42186.0,
+          "size_px": [
+            238,
+            232
+          ],
+          "bbox": [
+            531,
+            274,
+            238,
+            232
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "blue",
+          "shape": "circle",
+          "area": 42035.0,
+          "size_px": [
+            239,
+            229
+          ],
+          "bbox": [
+            530,
+            275,
+            239,
+            229
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "blue",
+          "shape": "circle",
+          "area": 42123.0,
+          "size_px": [
+            238,
+            232
+          ],
+          "bbox": [
+            530,
+            275,
+            238,
+            232
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 2587.0,
+          "size_px": [
+            106,
+            50
+          ],
+          "bbox": [
+            1135,
+            648,
+            106,
+            50
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "blue",
+          "shape": "circle",
+          "area": 42393.0,
+          "size_px": [
+            238,
+            238
+          ],
+          "bbox": [
+            530,
+            275,
+            238,
+            238
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "blue",
+          "shape": "circle",
+          "area": 42195.0,
+          "size_px": [
+            238,
+            237
+          ],
+          "bbox": [
+            530,
+            275,
+            238,
+            237
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        2
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "green",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "green",
+          "shape": "square",
+          "area": 47502.5,
+          "size_px": [
+            274,
+            217
+          ],
+          "bbox": [
+            38,
+            294,
+            274,
+            217
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "green",
+          "shape": "square",
+          "area": 47518.5,
+          "size_px": [
+            274,
+            218
+          ],
+          "bbox": [
+            38,
+            294,
+            274,
+            218
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "green",
+          "shape": "square",
+          "area": 47526.0,
+          "size_px": [
+            274,
+            217
+          ],
+          "bbox": [
+            38,
+            294,
+            274,
+            217
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "green",
+          "shape": "square",
+          "area": 47437.5,
+          "size_px": [
+            274,
+            217
+          ],
+          "bbox": [
+            38,
+            294,
+            274,
+            217
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "green",
+          "shape": "square",
+          "area": 47431.0,
+          "size_px": [
+            274,
+            217
+          ],
+          "bbox": [
+            38,
+            294,
+            274,
+            217
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "green",
+          "shape": "square",
+          "area": 47407.5,
+          "size_px": [
+            274,
+            217
+          ],
+          "bbox": [
+            38,
+            294,
+            274,
+            217
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        2
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        2
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        2
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        2
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        1
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        1
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        1
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        1
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        1
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        1
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        1
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        1
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "green",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "red",
+          "shape": "vertical",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "red",
+          "shape": "vertical",
+          "area": 33547.5,
+          "size_px": [
+            211,
+            228
+          ],
+          "bbox": [
+            887,
+            289,
+            211,
+            228
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 2582.5,
+          "size_px": [
+            77,
+            50
+          ],
+          "bbox": [
+            511,
+            608,
+            77,
+            50
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "green",
+          "shape": "square",
+          "area": 33032.0,
+          "size_px": [
+            202,
+            184
+          ],
+          "bbox": [
+            463,
+            295,
+            202,
+            184
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "red",
+          "shape": "vertical",
+          "area": 34755.0,
+          "size_px": [
+            212,
+            229
+          ],
+          "bbox": [
+            888,
+            289,
+            212,
+            229
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 2699.5,
+          "size_px": [
+            79,
+            51
+          ],
+          "bbox": [
+            510,
+            608,
+            79,
+            51
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "green",
+          "shape": "square",
+          "area": 33463.5,
+          "size_px": [
+            204,
+            185
+          ],
+          "bbox": [
+            462,
+            294,
+            204,
+            185
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "red",
+          "shape": "vertical",
+          "area": 34943.0,
+          "size_px": [
+            212,
+            229
+          ],
+          "bbox": [
+            888,
+            289,
+            212,
+            229
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 2675.0,
+          "size_px": [
+            78,
+            52
+          ],
+          "bbox": [
+            510,
+            607,
+            78,
+            52
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "green",
+          "shape": "square",
+          "area": 33588.5,
+          "size_px": [
+            203,
+            185
+          ],
+          "bbox": [
+            463,
+            294,
+            203,
+            185
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "red",
+          "shape": "vertical",
+          "area": 35478.0,
+          "size_px": [
+            211,
+            231
+          ],
+          "bbox": [
+            889,
+            288,
+            211,
+            231
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 2778.0,
+          "size_px": [
+            78,
+            56
+          ],
+          "bbox": [
+            511,
+            608,
+            78,
+            56
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "green",
+          "shape": "square",
+          "area": 33932.5,
+          "size_px": [
+            204,
+            184
+          ],
+          "bbox": [
+            463,
+            295,
+            204,
+            184
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "red",
+          "shape": "vertical",
+          "area": 35539.5,
+          "size_px": [
+            211,
+            230
+          ],
+          "bbox": [
+            889,
+            288,
+            211,
+            230
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 2778.0,
+          "size_px": [
+            79,
+            57
+          ],
+          "bbox": [
+            511,
+            607,
+            79,
+            57
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "green",
+          "shape": "square",
+          "area": 33973.0,
+          "size_px": [
+            204,
+            184
+          ],
+          "bbox": [
+            463,
+            295,
+            204,
+            184
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "red",
+          "shape": "vertical",
+          "area": 35564.0,
+          "size_px": [
+            211,
+            230
+          ],
+          "bbox": [
+            889,
+            288,
+            211,
+            230
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 2796.0,
+          "size_px": [
+            79,
+            57
+          ],
+          "bbox": [
+            511,
+            607,
+            79,
+            57
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "green",
+          "shape": "square",
+          "area": 33965.5,
+          "size_px": [
+            204,
+            184
+          ],
+          "bbox": [
+            463,
+            295,
+            204,
+            184
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        5,
+        2
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        2
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        2
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        2
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "red",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "red",
+          "shape": "horizontal",
+          "area": 96570.0,
+          "size_px": [
+            427,
+            261
+          ],
+          "bbox": [
+            204,
+            383,
+            427,
+            261
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "red",
+          "shape": "horizontal",
+          "area": 98690.0,
+          "size_px": [
+            426,
+            261
+          ],
+          "bbox": [
+            204,
+            383,
+            426,
+            261
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "red",
+          "shape": "horizontal",
+          "area": 99026.5,
+          "size_px": [
+            427,
+            260
+          ],
+          "bbox": [
+            204,
+            384,
+            427,
+            260
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "red",
+          "shape": "horizontal",
+          "area": 98953.0,
+          "size_px": [
+            427,
+            261
+          ],
+          "bbox": [
+            204,
+            383,
+            427,
+            261
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "red",
+          "shape": "horizontal",
+          "area": 98865.5,
+          "size_px": [
+            427,
+            261
+          ],
+          "bbox": [
+            204,
+            383,
+            427,
+            261
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "red",
+          "shape": "horizontal",
+          "area": 98790.0,
+          "size_px": [
+            427,
+            260
+          ],
+          "bbox": [
+            204,
+            384,
+            427,
+            260
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        5
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        5
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        5
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "yellow",
+          "shape": "square",
+          "votes": 1,
+          "confidence": 0.16666666666666666
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "square",
+          "area": 3329.0,
+          "size_px": [
+            87,
+            79
+          ],
+          "bbox": [
+            1154,
+            572,
+            87,
+            79
+          ]
+        }
+      ]
+    }
+  ],
+  "trajectory": [
+    {
+      "step": 34,
+      "grid_x": 3,
+      "grid_y": 6,
+      "heading": "WEST"
+    },
+    {
+      "step": 35,
+      "grid_x": 3,
+      "grid_y": 5,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 36,
+      "grid_x": 3,
+      "grid_y": 4,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 37,
+      "grid_x": 2,
+      "grid_y": 4,
+      "heading": "WEST"
+    },
+    {
+      "step": 38,
+      "grid_x": 2,
+      "grid_y": 3,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 39,
+      "grid_x": 2,
+      "grid_y": 4,
+      "heading": "NORTH"
+    },
+    {
+      "step": 40,
+      "grid_x": 1,
+      "grid_y": 4,
+      "heading": "WEST"
+    },
+    {
+      "step": 41,
+      "grid_x": 1,
+      "grid_y": 3,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 42,
+      "grid_x": 1,
+      "grid_y": 2,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 43,
+      "grid_x": 2,
+      "grid_y": 2,
+      "heading": "EAST"
+    },
+    {
+      "step": 44,
+      "grid_x": 3,
+      "grid_y": 2,
+      "heading": "EAST"
+    },
+    {
+      "step": 45,
+      "grid_x": 4,
+      "grid_y": 2,
+      "heading": "EAST"
+    },
+    {
+      "step": 46,
+      "grid_x": 4,
+      "grid_y": 3,
+      "heading": "NORTH"
+    },
+    {
+      "step": 47,
+      "grid_x": 4,
+      "grid_y": 4,
+      "heading": "NORTH"
+    },
+    {
+      "step": 48,
+      "grid_x": 4,
+      "grid_y": 5,
+      "heading": "NORTH"
+    },
+    {
+      "step": 49,
+      "grid_x": 4,
+      "grid_y": 6,
+      "heading": "NORTH"
+    },
+    {
+      "step": 50,
+      "grid_x": 5,
+      "grid_y": 6,
+      "heading": "EAST"
+    },
+    {
+      "step": 51,
+      "grid_x": 5,
+      "grid_y": 5,
+      "heading": "SOUTH"
+    }
+  ]
+}

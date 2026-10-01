@@ -1,0 +1,13 @@
+grid_x,grid_y,direction,color,color_label,shape,shape_label,area_px,image_path
+1,1,WEST,green,เขียว,square,จัตุรัส,41599,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_1_1_WEST_green_square_det_20261001_064642.jpg
+1,6,NORTH,yellow,เหลือง,circle,วงกลม,19221,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_1_6_NORTH_yellow_circle_det_20261001_064749.jpg
+2,1,WEST,blue,น้ำเงิน,circle,วงกลม,41300,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_2_1_WEST_blue_circle_det_20261001_065051.jpg
+3,1,SOUTH,yellow,เหลือง,square,จัตุรัส,31288,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_3_1_SOUTH_yellow_square_det_20261001_065039.jpg
+4,1,SOUTH,yellow,เหลือง,circle,วงกลม,63352,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_4_1_SOUTH_yellow_circle_det_20261001_065015.jpg
+5,1,WEST,red,แดง,square,จัตุรัส,37928,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_5_1_WEST_red_square_det_20261001_065310.jpg
+6,1,SOUTH,blue,น้ำเงิน,circle,วงกลม,28424,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_1_SOUTH_blue_circle_det_20261001_065249.jpg
+6,3,EAST,green,เขียว,square,จัตุรัส,32712,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_3_EAST_green_square_det_20261001_065214.jpg
+6,4,EAST,red,แดง,horizontal,ผืนผ้าแนวนอน,41152,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_4_EAST_red_horizontal_det_20261001_065705.jpg
+6,6,EAST,green,เขียว,square,จัตุรัส,30863,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_6_EAST_green_square_det_20261001_065620.jpg
+6,6,EAST,yellow,เหลือง,horizontal,ผืนผ้าแนวนอน,5830,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_6_EAST_yellow_horizontal_det_20261001_065620.jpg
+6,6,NORTH,green,เขียว,vertical,ผืนผ้าแนวตั้ง,43832,C:\Users\praew\Documents\ROBOT\slam-main\results\targets\target_6_6_NORTH_green_vertical_det_20261001_065629.jpg

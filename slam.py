@@ -32,6 +32,8 @@ from robot_control import (
     align_heading,
     aim_verify_and_fire,
     move_one_cell,
+    get_current_yaw_error,
+    read_walls_for_recenter,
     read_distance_with_gimbal,
     recenter_in_cell,
     reset_sensor_filters,
@@ -84,69 +86,121 @@ def _record_pose(step, position, heading):
 
 def clean_old_results():
     """
-    Clear old logs, map images, CSVs, and target photos before starting a new mapping run.
-    Ensures a fresh, clean slate for Round 1 mapping without clutter from previous sessions.
-    NOTE: Called ONLY when starting 'mapping' mode, NEVER when starting 'targets' mode (Round 2).
+    Archive old logs, map images, CSVs, and target photos to results/history/session_YYYYMMDD_HHMMSS/
+    before starting a new mapping run.
+    Guarantees past session data is permanently preserved and NEVER overwritten or deleted.
+    NOTE: Called ONLY when starting a fresh 'mapping' mode, NEVER when starting 'targets' mode (Round 2) or 'resume'.
     """
     import glob
-    results_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
-    targets_dir = os.path.join(results_dir, "targets")
-    os.makedirs(targets_dir, exist_ok=True)
-
-    # 1. Clear target snapshot images
-    for p in glob.glob(os.path.join(targets_dir, "*.*")):
-        try:
-            os.remove(p)
-        except Exception:
-            pass
-
-    # 2. Clear CSVs, TXT logs, and PNGs in results/
-    for ext in ("*.csv", "*.txt", "*.png"):
-        for p in glob.glob(os.path.join(results_dir, ext)):
-            try:
-                os.remove(p)
-            except Exception:
-                pass
-
-    # 3. Clear root-level result images and leftover CSVs if any
+    import shutil
     code_dir = os.path.dirname(os.path.abspath(__file__))
-    for fname in ("final_slam_map.png", "robot_trajectory.png", "robot_trajectory_round1.png",
-                  "robot_trajectory_round2.png", "slam_map.png", "exploration_log.csv",
-                  "signs_data.csv", "trajectory_log.csv", "trajectory_log_round1.csv",
-                  "trajectory_log_round2.csv", "visited_cells.csv", "wall_data.csv"):
-        p = os.path.join(code_dir, fname)
-        if os.path.exists(p):
+    results_dir = os.path.join(code_dir, "results")
+    targets_dir = os.path.join(results_dir, "targets")
+    history_dir = os.path.join(results_dir, "history")
+    os.makedirs(targets_dir, exist_ok=True)
+    os.makedirs(history_dir, exist_ok=True)
+
+    # Check if there are any existing results to archive
+    has_existing = False
+    for ext in ("*.csv", "*.txt", "*.png"):
+        if glob.glob(os.path.join(results_dir, ext)):
+            has_existing = True
+            break
+    if glob.glob(os.path.join(targets_dir, "*.*")):
+        has_existing = True
+    if os.path.exists(MISSION_MAP_PATH):
+        has_existing = True
+
+    if has_existing:
+        session_id = time.strftime("session_%Y%m%d_%H%M%S")
+        session_archive_dir = os.path.join(history_dir, session_id)
+        os.makedirs(session_archive_dir, exist_ok=True)
+        session_targets_dir = os.path.join(session_archive_dir, "targets")
+        os.makedirs(session_targets_dir, exist_ok=True)
+
+        # 1. Archive targets
+        for p in glob.glob(os.path.join(targets_dir, "*.*")):
             try:
+                shutil.copy2(p, session_targets_dir)
                 os.remove(p)
             except Exception:
                 pass
 
-    # 4. Clear maps/mission_map.json
-    if os.path.exists(MISSION_MAP_PATH):
-        try:
-            os.remove(MISSION_MAP_PATH)
-        except Exception:
-            pass
-    if os.path.exists(LEGACY_MISSION_MAP_PATH):
-        try:
-            os.remove(LEGACY_MISSION_MAP_PATH)
-        except Exception:
-            pass
-    print("🧹 [CLEANUP] เคลียร์ไฟล์และข้อมูลของรอบเก่าทั้งหมดเรียบร้อยแล้ว (Cleaned old session data)")
+        # 2. Archive CSVs, TXT, PNGs from results/
+        for ext in ("*.csv", "*.txt", "*.png"):
+            for p in glob.glob(os.path.join(results_dir, ext)):
+                try:
+                    shutil.copy2(p, session_archive_dir)
+                    os.remove(p)
+                except Exception:
+                    pass
+
+        # 3. Archive root-level result images and leftover CSVs
+        for fname in ("final_slam_map.png", "final_slam_map_round1.png", "final_slam_map_round2.png",
+                      "robot_trajectory.png", "robot_trajectory_round1.png",
+                      "robot_trajectory_round2.png", "slam_map.png", "exploration_log.csv",
+                      "signs_data.csv", "trajectory_log.csv", "trajectory_log_round1.csv",
+                      "trajectory_log_round2.csv", "visited_cells.csv", "wall_data.csv"):
+            p = os.path.join(code_dir, fname)
+            if os.path.exists(p):
+                try:
+                    shutil.copy2(p, session_archive_dir)
+                    os.remove(p)
+                except Exception:
+                    pass
+
+        # 4. Backup and archive maps/mission_map*.json
+        for m_file in glob.glob(os.path.join(MAP_DIR, "mission_map*.json")):
+            try:
+                shutil.copy2(m_file, session_archive_dir)
+            except Exception:
+                pass
+
+        if os.path.exists(MISSION_MAP_PATH):
+            try:
+                backup_p = os.path.join(MAP_DIR, "backup_mission_map.json")
+                shutil.copy2(MISSION_MAP_PATH, backup_p)
+                os.remove(MISSION_MAP_PATH)
+            except Exception:
+                pass
+
+        print(f"📦 [ARCHIVE] สำรองไฟล์ผลลัพธ์รอบก่อนหน้าไว้ที่: results/history/{session_id}/ เรียบร้อยแล้ว (ไม่สูญหายและไม่ทับซ้อน)")
 
 
-def _save_mission_map(start_config):
+def _save_mission_map(start_config, current_position=None, current_heading=None, step=0, round_name=None):
     with state.state_lock:
+        if current_position is None:
+            if state.exploration_stack:
+                current_position = state.exploration_stack[-1]
+            elif state.trajectory:
+                current_position = (state.trajectory[-1]["grid_x"], state.trajectory[-1]["grid_y"])
+            elif start_config:
+                current_position = (start_config[0], start_config[1])
+            else:
+                current_position = (1, 1)
+
+        if current_heading is None:
+            if state.trajectory:
+                current_heading = state.trajectory[-1]["heading"]
+            elif start_config and len(start_config) >= 3:
+                current_heading = start_config[2]
+            else:
+                current_heading = "NORTH"
+
         payload = {
-            "version": 3,
+            "version": 4,
             "grid_size_m": config.GRID_SIZE_M,
             "grid_width": config.GRID_W,
             "grid_height": config.GRID_H,
-            "start": list(start_config),
+            "start": list(start_config) if start_config else [1, 1, "NORTH"],
+            "last_position": list(current_position),
+            "last_heading": str(current_heading),
+            "step": int(step),
             "h_walls": sorted([list(edge) for edge in state.detected_h_walls]),
             "v_walls": sorted([list(edge) for edge in state.detected_v_walls]),
             "discovered": sorted([list(cell) for cell in state.discovered_cells]),
             "visited": sorted([list(cell) for cell in state.visited_cells]),
+            "fired_targets": [list(t) for t in state.fired_targets],
             "targets": [
                 {"cell": list(cell), "direction": direction, "signs": list(signs)}
                 for (cell, direction), signs in state.detected_signs.items() if signs
@@ -155,23 +209,86 @@ def _save_mission_map(start_config):
                 {"cell": list(cell), "direction": direction, **scan}
                 for (cell, direction), scan in state.color_scan_results.items()
             ],
+            "trajectory": [
+                {"step": t["step"], "grid_x": t["grid_x"], "grid_y": t["grid_y"], "heading": t["heading"]}
+                for t in state.trajectory[-100:]
+            ],
         }
     os.makedirs(MAP_DIR, exist_ok=True)
     temp_path = MISSION_MAP_PATH + ".tmp"
     with open(temp_path, "w", encoding="utf-8") as output:
         json.dump(payload, output, ensure_ascii=False, indent=2)
-    os.replace(temp_path, MISSION_MAP_PATH)
+    norm_r = str(round_name).lower() if round_name else ""
+    r_suffix = None
+    if "round1" in norm_r or "slam" in norm_r or "mapping" in norm_r:
+        r_suffix = "round1"
+    elif "round2" in norm_r or "astar" in norm_r or "target" in norm_r:
+        r_suffix = "round2"
+    elif round_name and round_name not in ("autosave", "emergency_stop", "emergency_crash_stop"):
+        r_suffix = norm_r
+
+    if r_suffix == "round2":
+        round2_map_path = os.path.join(MAP_DIR, "mission_map_round2.json")
+        os.replace(temp_path, round2_map_path)
+    else:
+        os.replace(temp_path, MISSION_MAP_PATH)
+        if r_suffix:
+            round_map_path = os.path.join(MAP_DIR, f"mission_map_{r_suffix}.json")
+            try:
+                import shutil
+                shutil.copy2(MISSION_MAP_PATH, round_map_path)
+            except Exception:
+                pass
 
 
 def _load_mission_map():
-    map_path = MISSION_MAP_PATH if os.path.exists(MISSION_MAP_PATH) else LEGACY_MISSION_MAP_PATH
-    with open(map_path, "r", encoding="utf-8") as source:
-        data = json.load(source)
-    gw = int(data.get("grid_width", config.GRID_W))
-    gh = int(data.get("grid_height", config.GRID_H))
-    cs = float(data.get("grid_size_m", config.GRID_SIZE_M))
-    config.set_grid_dimensions(gw, gh, cs)
-    return data
+    round1_path = os.path.join(MAP_DIR, "mission_map_round1.json")
+    backup_path = os.path.join(MAP_DIR, "backup_mission_map.json")
+
+    # 1. First priority: The active session map (MISSION_MAP_PATH)
+    # If it has real exploration data (>= 2 cells visited), use it directly (critical for Resume!)
+    if os.path.exists(MISSION_MAP_PATH):
+        try:
+            with open(MISSION_MAP_PATH, "r", encoding="utf-8") as source:
+                data = json.load(source)
+            if len(data.get("visited", [])) >= 2:
+                gw = int(data.get("grid_width", config.GRID_W))
+                gh = int(data.get("grid_height", config.GRID_H))
+                cs = float(data.get("grid_size_m", config.GRID_SIZE_M))
+                config.set_grid_dimensions(gw, gh, cs)
+                return data
+        except Exception as e:
+            print(f"[MAP LOAD WARNING] ไม่สามารถอ่าน {MISSION_MAP_PATH}: {e}")
+
+    # 2. Second priority: mission_map_round1.json
+    if os.path.exists(round1_path):
+        try:
+            with open(round1_path, "r", encoding="utf-8") as source:
+                data = json.load(source)
+            if len(data.get("visited", [])) >= 2:
+                gw = int(data.get("grid_width", config.GRID_W))
+                gh = int(data.get("grid_height", config.GRID_H))
+                cs = float(data.get("grid_size_m", config.GRID_SIZE_M))
+                config.set_grid_dimensions(gw, gh, cs)
+                return data
+        except Exception:
+            pass
+
+    # 3. Third priority: Fallback to backup_mission_map.json or legacy
+    for p in (backup_path, MISSION_MAP_PATH, LEGACY_MISSION_MAP_PATH):
+        if os.path.exists(p):
+            try:
+                with open(p, "r", encoding="utf-8") as source:
+                    data = json.load(source)
+                gw = int(data.get("grid_width", config.GRID_W))
+                gh = int(data.get("grid_height", config.GRID_H))
+                cs = float(data.get("grid_size_m", config.GRID_SIZE_M))
+                config.set_grid_dimensions(gw, gh, cs)
+                return data
+            except Exception:
+                pass
+
+    raise FileNotFoundError(f"ไม่พบไฟล์แผนที่ {MISSION_MAP_PATH}")
 
 
 def _shortest_cell_path(start, goal, current_heading=None):
@@ -202,11 +319,17 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
         if unique:
             targets.append({"cell": tuple(cell), "direction": direction, "signs": unique})
     position = start_pos
+    r2_grid_steps = 0
     _record_pose(step, position, heading)
     align_heading(ep_chassis, heading, sim_mode)
     if not targets:
+        total_signs_found = sum(len(s) for s in state.detected_signs.values())
         if dashboard:
-            dashboard.log("⚠️ ไม่พบเป้าหมายที่ตรวจจับได้จากรอบแรก หรือยิงครบหมดแล้ว")
+            if total_signs_found > 0:
+                dashboard.log(f"⚠️ [รอบ 2 A*] ไม่พบเป้าหมายที่ตรงกับเงื่อนไข: ตรวจพบในแผนที่ทั้งหมด {total_signs_found} เป้า แต่ไม่มีเป้าหมายที่ตรงกับ สี={sorted(color_filter)} และ รูปร่าง={sorted(shape_filter)}")
+                dashboard.log("💡 แนะนำ: กรุณาติ๊กเลือกสี/รูปร่างเป้าหมายในหน้าต่าง GUI ให้ครอบคลุมเป้าที่ตรวจพบ")
+            else:
+                dashboard.log("⚠️ [รอบ 2 A*] ไม่พบเป้าหมายที่ตรวจจับได้จากรอบแรก หรือยิงครบหมดแล้ว (กรุณารันรอบ 1 SLAM ให้เสร็จก่อน หรือกด '📂 โหลด CSV')")
         return position, heading
     if dashboard:
         dashboard.log(f"🎯 [RUN 2 TARGETS] พบเป้าหมายจากรอบแรกทั้งหมด {len(targets)} จุด พร้อมนำทางไปยิงทีละเป้าหมาย!")
@@ -220,7 +343,7 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
         routes = [(path, target) for path, target in routes if path]
         if not routes:
             if dashboard:
-                dashboard.log("Remaining targets are unreachable through saved open passages.")
+                dashboard.log(f"⚠️ [A* ROUTE] ไม่สามารถหาเส้นทางเดินไปยังเป้าหมายที่เหลือ {len(targets)} จุดผ่านช่องเปิดที่บันทึกไว้ได้")
             break
         path, target = min(routes, key=lambda pair: (len(pair[0]), pair[1]["cell"], pair[1]["direction"]))
         target_cell = target["cell"]
@@ -245,31 +368,52 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
             move_ok = False
             if _front_is_clear(front_dist):
                 move_ok = move_one_cell(
-                    ep_chassis, sim_mode, heading=heading, returning=True
+                    ep_chassis, sim_mode, heading=heading, returning=True, dashboard=dashboard
                 )
             else:
                 state.last_move_reason = "PREFLIGHT_WALL" if front_dist > 30 else "TOF_INVALID"
                 state.last_move_distance_m = 0.0
-            if not move_ok:
+            crossed_into_next_cell = (
+                move_ok or (
+                    state.last_move_reason not in {"TOF_INVALID", "CANCELLED"}
+                    and state.last_move_distance_m >= config.GRID_SIZE_M / 2
+                )
+            )
+            if not crossed_into_next_cell:
                 if dashboard:
                     dashboard.log(
                         f"Target route stopped at {position}: {state.last_move_reason}, "
                         f"ToF {front_dist:.0f}mm, moved {state.last_move_distance_m * 100:.1f}cm."
                     )
-                # Mark blocked edge so A* reroutes to next target instead of cancelling entire round
-                x, y = position
-                if heading == "NORTH": state.detected_h_walls.add((x, y))
-                elif heading == "SOUTH": state.detected_h_walls.add((x, y - 1))
-                elif heading == "EAST": state.detected_v_walls.add((x, y))
-                elif heading == "WEST": state.detected_v_walls.add((x - 1, y))
                 break
             position = next_cell
             step += 1
+            r2_grid_steps += 1
             _record_pose(step, position, heading)
             if dashboard:
                 dashboard.update(position, heading, step, f"A*: ไปยังเป้าหมาย {target_cell}")
+
+            # รอบที่ 2 (A*): รีเซ็นเตอร์ทุกๆ 2 กริิด เพื่อความแม่นยำสูงสุด
+            if r2_grid_steps >= 2:
+                if dashboard:
+                    dashboard.log(f"⚡ [A* RECENTER] รอบ 2 เดินครบ 2 กริิดที่ช่อง {position} -> รีเซ็นเตอร์จัดตำแหน่งกึ่งกลางช่องแม่นยำ")
+                readings = read_walls_for_recenter(ep_gimbal, position, heading, sim_mode)
+                recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
+                align_heading(ep_chassis, heading, sim_mode)
+                r2_grid_steps = 0
+
         if state.stop_requested or (deadline is not None and time.monotonic() >= deadline):
             break
+
+        # เมื่อถึงช่องเป้าหมาย ให้รีเซ็นเตอร์กึ่งกลางช่องก่อนเล็งยิง เพื่อความแม่นยำสูงสุด
+        if position == target["cell"]:
+            if r2_grid_steps > 0:
+                if dashboard:
+                    dashboard.log(f"🎯 [TARGET RECENTER] ถึงช่องเป้าหมาย {position} -> รีเซ็นเตอร์จัดกึ่งกลางช่องก่อนเล็งยิง")
+                readings = read_walls_for_recenter(ep_gimbal, position, heading, sim_mode)
+                recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
+                align_heading(ep_chassis, heading, sim_mode)
+                r2_grid_steps = 0
 
         # Use the bearing stored during mapping as a starting point.  Signs are
         # allowed at every 45-degree sector: the gimbal performs the final
@@ -357,13 +501,32 @@ def _run_target_round(ep_chassis, ep_gimbal, ep_blaster, camera_reader, start_po
                 align_heading(ep_chassis, target_heading, sim_mode)
                 heading = target_heading
                 front_dist = read_distance_with_gimbal(ep_gimbal, position, heading, heading, sim_mode)
-                if not _front_is_clear(front_dist) or not move_one_cell(ep_chassis, sim_mode, heading=heading, returning=True):
+                move_ok = False
+                if _front_is_clear(front_dist):
+                    move_ok = move_one_cell(ep_chassis, sim_mode, heading=heading, returning=True, dashboard=dashboard)
+                crossed_into_next_cell = (
+                    move_ok or (
+                        state.last_move_reason not in {"TOF_INVALID", "CANCELLED"}
+                        and state.last_move_distance_m >= config.GRID_SIZE_M / 2
+                    )
+                )
+                if not crossed_into_next_cell:
                     break
                 position = next_cell
                 step += 1
+                r2_grid_steps += 1
                 _record_pose(step, position, heading)
                 if dashboard:
                     dashboard.update(position, heading, step, f"A*: เดินกลับจุดเริ่มต้น {start_pos}")
+
+                # รีเซ็นเตอร์ทุกๆ 2 กริิดระหว่างเดินกลับ
+                if r2_grid_steps >= 2:
+                    if dashboard:
+                        dashboard.log(f"⚡ [A* RECENTER] เดินกลับครบ 2 กริิดที่ช่อง {position} -> รีเซ็นเตอร์จัดตำแหน่งกึ่งกลางช่อง")
+                    readings = read_walls_for_recenter(ep_gimbal, position, heading, sim_mode)
+                    recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
+                    align_heading(ep_chassis, heading, sim_mode)
+                    r2_grid_steps = 0
             if not state.stop_requested:
                 align_heading(ep_chassis, heading, sim_mode)
                 if dashboard:
@@ -388,7 +551,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
     if gw is not None and gh is not None:
         config.set_grid_dimensions(gw, gh, cs)
 
+    is_resume = mission_config.get("is_resume", False) or run_mode in ("resume", "recover")
     saved_map = None
+
     if run_mode in ("targets", "astar_only", "astar"):
         try:
             saved_map = _load_mission_map()
@@ -405,24 +570,74 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                     dashboard.log(f"Run 2 (A*) cannot load mapped targets: {exc}")
                 dashboard.run_finished() if dashboard else None
                 return False
+    elif is_resume:
+        try:
+            saved_map = _load_mission_map()
+            last_p = saved_map.get("last_position")
+            last_h = saved_map.get("last_heading")
+            if last_p:
+                start_config = (int(last_p[0]), int(last_p[1]), str(last_h or "NORTH"))
+            elif start_config is None:
+                start_config = tuple(saved_map.get("start", (1, 1, "NORTH")))
+            if dashboard:
+                dashboard.log(
+                    f"🔄 [RECOVERY LOAD] โหลด Checkpoint สำเร็จ! รันต่อจากพิกัด {start_config[:2]} ทิศ {start_config[2]} "
+                    f"(สำรวจแล้ว {len(saved_map.get('visited', []))} ช่อง, กำแพง {len(saved_map.get('h_walls', [])) + len(saved_map.get('v_walls', []))} แนว, เป้าหมาย {len(saved_map.get('targets', []))} จุด)"
+                )
+        except Exception as exc:
+            if dashboard:
+                dashboard.log(f"⚠️ โหลด Checkpoint ไม่สำเร็จ: {exc}")
+            is_resume = False
+
     start_pos = (start_config[0], start_config[1])
     heading = start_config[2]
     position = start_pos
 
-    # Reset all runtime state for a fresh run
-    state.reset_state(start_pos)
+    if not is_resume:
+        # Fresh run: reset SLAM state
+        if run_mode in ("targets", "astar_only", "astar") and saved_map is None and (state.detected_h_walls or state.detected_v_walls):
+            # Preserving in-memory CSV/pre-loaded map
+            state.stop_requested = False
+            state.fired_targets.clear()
+            state.trajectory.clear()
+            state.exploration_stack.clear()
+        else:
+            state.reset_state(start_pos)
+    else:
+        # Recovery run: preserve previously discovered and visited cells
+        state.stop_requested = False
+
     reset_sensor_filters()
     state.initial_heading = heading
+
     if saved_map is not None:
-        state.detected_h_walls.update(tuple(edge) for edge in saved_map["h_walls"])
-        state.detected_v_walls.update(tuple(edge) for edge in saved_map["v_walls"])
-        state.discovered_cells.update(tuple(cell) for cell in saved_map["discovered"])
-        state.visited_cells.update(tuple(cell) for cell in saved_map["visited"])
-        for target in saved_map["targets"]:
+        state.detected_h_walls.clear()
+        state.detected_v_walls.clear()
+        state.discovered_cells.clear()
+        state.visited_cells.clear()
+        state.detected_signs.clear()
+
+        state.detected_h_walls.update(tuple(edge) for edge in saved_map.get("h_walls", []))
+        state.detected_v_walls.update(tuple(edge) for edge in saved_map.get("v_walls", []))
+        state.discovered_cells.update(tuple(cell) for cell in saved_map.get("discovered", []))
+        state.visited_cells.update(tuple(cell) for cell in saved_map.get("visited", []))
+        if is_resume:
+            for t in saved_map.get("fired_targets", []):
+                if isinstance(t, (list, tuple)) and len(t) >= 3:
+                    c = tuple(t[0]) if isinstance(t[0], (list, tuple)) else t[0]
+                    state.fired_targets.add((c, t[1], t[2]))
+                else:
+                    state.fired_targets.add(tuple(t) if isinstance(t, list) else t)
+        else:
+            # Fresh Round 2: Clear fired targets so all detected targets from Round 1 will be visited & shot!
+            state.fired_targets.clear()
+        for target in saved_map.get("targets", []):
             key = (tuple(target["cell"]), target["direction"])
             state.detected_signs[key] = target["signs"]
+        if dashboard and hasattr(dashboard, "redraw_preview"):
+            dashboard.redraw_preview()
             if dashboard:
-                for sign in target["signs"]:
+                for sign in target.get("signs", []):
                     img_p = sign.get("image_path")
                     if img_p and os.path.exists(img_p):
                         meta = {
@@ -439,6 +654,10 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             key = (tuple(scan["cell"]), scan["direction"])
             state.color_scan_results[key] = {k: v for k, v in scan.items()
                                              if k not in ("cell", "direction")}
+
+    if is_resume and dashboard:
+        resumed_step = int(saved_map.get("step", len(state.visited_cells))) if saved_map else 0
+        dashboard.update(position, heading, resumed_step, f"กู้คืนสถานะสำเร็จ: รันต่อจาก {position} ทิศ {heading}")
 
     ep_robot = ep_chassis = ep_gimbal = ep_sensor = ep_ir_adapter = ep_camera = camera_reader = ep_blaster = None
     vision_analyzer = None
@@ -489,9 +708,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
         if dashboard:
             dashboard.log(f"เริ่มสำรวจจาก {position} ทิศ {heading}")
 
-        step = 0
+        step = int(saved_map.get("step", len(state.visited_cells))) if (is_resume and saved_map) else 0
         round_started = time.monotonic()
-        is_mapping_round = run_mode in ("mapping", "slam_only", "slam")
+        is_mapping_round = run_mode in ("mapping", "slam_only", "slam", "resume", "recover")
         round_limit_s = getattr(config, "ROUND2_LIMIT_S", 600)  # 10 minutes (600s) threshold for notification
         round_label = "round1" if is_mapping_round else "round2"
         warned_10min = False
@@ -506,9 +725,12 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
         if dashboard:
             if is_mapping_round:
                 dashboard.log("=" * 60)
-                dashboard.log("🗺️ [ROUND 1 - SLAM] เริ่มต้นรอบที่ 1: เดินสำรวจและสร้างแผนที่ด้วย SLAM")
+                if is_resume:
+                    dashboard.log("🔄 [RECOVERY RUN] กำลังกู้คืนและวิ่งสำรวจแผนที่ต่อจากจุดล่าสุด...")
+                else:
+                    dashboard.log("🗺️ [ROUND 1 - SLAM] เริ่มต้นรอบที่ 1: เดินสำรวจและสร้างแผนที่ด้วย SLAM")
                 dashboard.log(f"   ▸ โหมด: วิ่งสำรวจต่อเนื่องจนจบครบทุกช่อง (แจ้งเตือนเมื่อเกิน 10 นาที)")
-                dashboard.log(f"   ▸ จุดเริ่มต้น: {position} ทิศ {heading}")
+                dashboard.log(f"   ▸ ตำแหน่งปัจจุบัน: {position} ทิศ {heading}")
                 dashboard.log("=" * 60)
             else:
                 dashboard.log("=" * 60)
@@ -547,7 +769,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             )
 
         # ติดตามช่องที่เคยสแกนหาเป้าหมายไปแล้ว เพื่อไม่ให้เสียเวลาสแกนซ้ำเมื่อเดินผ่าน
-        scanned_target_cells = set()
+        scanned_target_cells = set(state.visited_cells)
+        failed_edge_attempts = {}
+        backtrack_steps = 0
 
         while not state.stop_requested and is_mapping_round:
             # แจ้งเตือนเมื่อเวลาเกิน 10 นาที (600s) แต่ให้หุ่นยนต์รันต่อไปจนจบครบแมพ ไม่หยุดชะงัก
@@ -574,15 +798,22 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                 dashboard.log(f"📍 [STEP {step}] หุ่นยนต์อยู่ที่ ({position[0]},{position[1]}) ทิศ {heading} | สำรวจแล้ว {len(state.visited_cells)}/{config.GRID_W*config.GRID_H} ช่อง ({len(state.visited_cells)/(config.GRID_W*config.GRID_H)*100:.1f}%)")
 
             if is_already_visited:
-                # ตรงที่เดิน visit ไปแล้ว ไม่ต้องหาเป้าหมายซ้ำ! (Fast Backtrack Pass)
-                if dashboard:
-                    dashboard.log(f"⚡ [FAST PASS] ช่อง {position} เคยสำรวจแล้ว -> ไม่ต้องหาเป้าหมายซ้ำ (เดินผ่านเร็ว)")
-                readings = scan_45_degree_sweep(
-                    ep_chassis, ep_gimbal, position, heading, sim_mode, dashboard, step,
-                    camera_reader=None, color_filter=None, shape_filter=None,
-                    blaster=None, fire_enabled=False, search_targets=False,
-                )
+                # ทางเดิม: ไม่ต้องหันเช็คสี และไม่ต้องหันเช็คกำแพง ให้เดินไปเลย รีเซ็นเตอร์ทีละ 2 กริิด
+                backtrack_steps += 1
+                readings = {}
+
+                if backtrack_steps >= 2:
+                    if dashboard:
+                        dashboard.log(f"⚡ [FAST PASS] ช่อง {position} ทางเดิม: ครบ 2 กริิด -> รีเซ็นเตอร์จัดตำแหน่ง")
+                    # อ่านเฉพาะกำแพงที่มีในแผนที่เพื่อรีเซ็นเตอร์ (ไม่หันเช็คสี ไม่สแกนภาพ)
+                    readings = read_walls_for_recenter(ep_gimbal, position, heading, sim_mode)
+                    recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
+                    backtrack_steps = 0
+                else:
+                    if dashboard:
+                        dashboard.log(f"⚡ [FAST PASS] ช่อง {position} ทางเดิม (ก้าวที่ {backtrack_steps}/2) -> เดินผ่านทันที (ไม่เช็คสี/กำแพง)")
             else:
+                backtrack_steps = 0
                 if dashboard:
                     dashboard.log(f"🔭 [SCAN START] เริ่มสแกน 3 ทิศทาง (หน้า, ขวา, ซ้าย) จากช่อง {position}")
                 readings = scan_45_degree_sweep(
@@ -592,16 +823,13 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                     search_targets=True,
                 )
 
+                # ช่องใหม่: ปรับกึ่งกลางช่องเสมอ
+                recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
+
             state.visited_cells.add(position)
             if is_mapping_round:
                 _save_mission_map(start_config)
 
-            if state.stop_requested:
-                break
-
-            # ปรับกึ่งกลางเฉพาะช่องใหม่ เพื่อความรวดเร็วในการเคลื่อนที่
-            if not is_already_visited:
-                recenter_in_cell(ep_chassis, ep_gimbal, readings, position, heading, sim_mode, dashboard)
             if state.stop_requested:
                 break
 
@@ -665,6 +893,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                     )
 
             if move_ok:
+                failed_edge_attempts.pop((position, next_cell), None)
                 position = next_cell
                 state.exploration_stack.append(position)
                 state.visited_cells.add(position)
@@ -679,6 +908,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                         f"Cell move confirmed; scanning from {position}",
                     )
             else:
+                edge_key = (position, next_cell)
+                failed_edge_attempts[edge_key] = failed_edge_attempts.get(edge_key, 0) + 1
+                edge_fails = failed_edge_attempts[edge_key]
                 obstacle_stop = state.last_move_reason in {
                     "PREFLIGHT_WALL", "FRONT_BRAKE", "EMERGENCY"
                 }
@@ -699,9 +931,9 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                     state.visited_cells.add(position)
                     state.discovered_cells.add(position)
 
-                # A valid ToF stop is wall evidence. Anchor that wall to the
-                # cell the chassis actually occupies after the measured move.
-                if obstacle_stop:
+                # A valid ToF stop or 2 consecutive failures is wall evidence.
+                # Anchor that wall to the cell the chassis actually occupies.
+                if obstacle_stop or edge_fails >= 2:
                     x, y = position
                     if heading == "NORTH":
                         state.detected_h_walls.add((x, y))
@@ -726,7 +958,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                 # mark this edge as impassable so pathfinding will navigate around it to reach
                 # all remaining unvisited cells in the maze.
                 if not obstacle_stop and not crossed_into_next_cell:
-                    if state.last_move_reason not in {"TOF_INVALID", "CANCELLED"}:
+                    if state.last_move_reason not in {"TOF_INVALID", "CANCELLED"} or edge_fails >= 2:
                         x, y = position
                         if heading == "NORTH":
                             state.detected_h_walls.add((x, y))
@@ -738,16 +970,17 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
                             state.detected_v_walls.add((x - 1, y))
                         if dashboard:
                             dashboard.log(
-                                f"⚠️ เดินหน้าไม่สำเร็จ ({state.last_move_reason}) "
-                                f"-> บันทึกสิ่งกีดขวาง และคำนวณเส้นทางอื่นเพื่อสำรวจช่องที่เหลือให้ครบทั้งแมพ"
+                                f"⚠️ เดินหน้าไม่สำเร็จ ({state.last_move_reason}, ครั้งที่ {edge_fails}) "
+                                f"-> บันทึกแนวกำแพงปิดกั้น และคำนวณเส้นทางอื่นเพื่อสำรวจช่องที่เหลือให้ครบทั้งแมพ"
                             )
                     else:
                         if dashboard:
                             dashboard.log(
-                                f"⚠️ สัญญาณเซนเซอร์ขัดข้องชั่วคราว ({state.last_move_reason}) "
+                                f"⚠️ สัญญาณเซนเซอร์ขัดข้องชั่วคราว ({state.last_move_reason}, ครั้งที่ {edge_fails}/2) "
                                 f"-> ข้ามการเดินรอบนี้โดยไม่บันทึกกำแพงปลอม เพื่อลองใหม่ในรอบถัดไป"
                             )
 
+            _save_mission_map(start_config, current_position=position, current_heading=heading, step=step)
             step += 1
 
         # Per user request: after completing exploration of all reachable cells,
@@ -771,7 +1004,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
         save_outputs(round_label)
 
         if is_mapping_round:
-            _save_mission_map(start_config)
+            _save_mission_map(start_config, current_position=position, current_heading=heading, step=step, round_name=round_label)
             mission_ready = True
             if dashboard:
                 dashboard.log(f"Saved SLAM map and target detections to {MISSION_MAP_PATH}")
@@ -804,24 +1037,25 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             dashboard.log("• บันทึกไฟล์ผลลัพธ์  : โฟลเดอร์ results/ และ final_slam_map.png")
             dashboard.log("=" * 60)
             _rl = round_label
-            dashboard._post_ui(lambda: dashboard.show_final_map_window(_rl))
+            if hasattr(dashboard, "_post_ui") and hasattr(dashboard, "show_final_map_window"):
+                dashboard._post_ui(lambda: dashboard.show_final_map_window(_rl))
 
     except KeyboardInterrupt:
         print("\n⚠️ ผู้ใช้กดหยุดฉุกเฉิน (KeyboardInterrupt / Ctrl+C)")
         state.stop_requested = True
         if state.visited_cells:
-            _save_mission_map(start_config)
+            _save_mission_map(start_config, current_position=position, current_heading=heading, step=step, round_name=round_label)
             save_outputs(round_label)
-            print(f"💾 บันทึกแผนที่ ({len(state.visited_cells)} ช่อง, {sum(len(s) for s in state.detected_signs.values())} เป้า) ลง {MISSION_MAP_PATH} สำเร็จแล้ว พร้อมรันรอบ 2 ได้ทันที!")
+            print(f"💾 บันทึกแผนที่ ({len(state.visited_cells)} ช่อง, {sum(len(s) for s in state.detected_signs.values())} เป้า) ลง {MISSION_MAP_PATH} สำเร็จแล้ว พร้อมรันรอบ 2 หรือกู้คืนได้ทันที!")
             if dashboard:
-                dashboard.log("💾 [AUTOSAVE] บันทึกแผนที่และภาพเป้าหมายลงไฟล์เรียบร้อยแล้ว (พร้อมสำหรับ Run 2)")
+                dashboard.log("💾 [AUTOSAVE] บันทึกแผนที่และภาพเป้าหมายลงไฟล์เรียบร้อยแล้ว (พร้อมสำหรับกู้คืนหรือ Run 2)")
     except Exception as e:
         print(f"เกิดข้อผิดพลาด: {e}")
         import traceback
         traceback.print_exc()
         if state.visited_cells:
             try:
-                _save_mission_map(start_config)
+                _save_mission_map(start_config, current_position=position, current_heading=heading, step=step, round_name=round_label)
                 save_outputs(round_label)
             except Exception:
                 pass
@@ -834,7 +1068,7 @@ def run_exploration(sim_mode, start_config, dashboard, ground_truth=None, missio
             pass
         if state.visited_cells:
             try:
-                _save_mission_map(start_config)
+                _save_mission_map(start_config, current_position=position, current_heading=heading, step=step, round_name=round_label)
                 save_outputs(round_label)
             except Exception:
                 pass
@@ -876,17 +1110,28 @@ def main():
     parser = argparse.ArgumentParser(description="RoboMaster Autonomous SLAM - Assignment 2")
     parser.add_argument("--sim", action="store_true", help="จำลองโดยไม่เชื่อมต่อหุ่นยนต์จริง")
     parser.add_argument("--no-dashboard", action="store_true", help="ไม่เปิดหน้าต่าง dashboard")
+    parser.add_argument("--resume", action="store_true", help="กู้คืนสถานะและรันต่อจากจุดล่าสุด (Resume from latest checkpoint)")
     parser.add_argument("--start-x", type=int, default=1, help="พิกัด X เริ่มต้น (1 ถึง 6)")
     parser.add_argument("--start-y", type=int, default=1, help="พิกัด Y เริ่มต้น (1 ถึง 6)")
     parser.add_argument("--start-heading", choices=DIRECTIONS, default="NORTH", help="ทิศทางเริ่มต้น")
-    parser.add_argument("--mode", choices=["all", "slam", "astar", "mapping", "targets"], default="all",
-                        help="โหมด: slam (รอบ 1 SLAM), astar (รอบ 2 A*), all (รอบ 1 SLAM ➔ รอบ 2 A*)")
+    parser.add_argument("--mode", choices=["all", "slam", "astar", "mapping", "targets", "resume"], default="all",
+                        help="โหมด: slam (รอบ 1 SLAM), astar (รอบ 2 A*), all (รอบ 1 SLAM ➔ รอบ 2 A*), resume (กู้คืนรันต่อ)")
     args = parser.parse_args()
 
     default_start = (args.start_x, args.start_y, args.start_heading)
 
     if args.no_dashboard:
-        if args.mode in ("slam", "mapping"):
+        if args.resume or args.mode in ("resume", "recover"):
+            ready = run_exploration(
+                args.sim, default_start, None,
+                mission_config={"run_mode": "resume", "is_resume": True, "colors": set(COLORS), "shapes": set(SHAPES)}
+            )
+            if ready and not state.stop_requested:
+                run_exploration(
+                    args.sim, default_start, None,
+                    mission_config={"run_mode": "astar_only", "colors": set(COLORS), "shapes": set(SHAPES)},
+                )
+        elif args.mode in ("slam", "mapping"):
             clean_old_results()
             run_exploration(args.sim, default_start, None, mission_config={"run_mode": "slam_only", "colors": set(COLORS), "shapes": set(SHAPES)})
         elif args.mode in ("astar", "targets"):
@@ -905,7 +1150,32 @@ def main():
         def on_start(start_cfg, mission_cfg):
             try:
                 run_mode = mission_cfg.get("run_mode", "auto_all")
-                if run_mode in ("slam_only", "slam"):
+                is_resume = mission_cfg.get("is_resume", False) or run_mode in ("resume", "recover")
+
+                if is_resume:
+                    if dashboard:
+                        dashboard.log("🔄 [RECOVERY] กำลังกู้คืนข้อมูลและเตรียมพร้อมรันต่อจากจุดล่าสุด...")
+                    ready = run_exploration(
+                        args.sim, start_cfg, dashboard,
+                        mission_config=dict(mission_cfg, run_mode="resume", is_resume=True), finish_dashboard=False,
+                    )
+                    if ready and not state.stop_requested:
+                        if dashboard:
+                            dashboard.on_round_completed("round1")
+                            dashboard.log("=" * 60)
+                            dashboard.log("🎉 จบรอบที่ 1 (SLAM) สำเร็จ! กำลังต่อ [รอบที่ 2: A* Algorithm] อัตโนมัติ...")
+                            dashboard.log("=" * 60)
+                            dashboard.start_timer("round2", "รอบ 2 (A*)")
+                        target_config = dict(mission_cfg, run_mode="astar_only")
+                        run_exploration(
+                            args.sim, start_cfg, dashboard,
+                            mission_config=target_config, finish_dashboard=True,
+                        )
+                    else:
+                        if dashboard:
+                            dashboard.on_round_completed("round1")
+                        dashboard.run_finished()
+                elif run_mode in ("slam_only", "slam"):
                     clean_old_results()
                     if dashboard:
                         dashboard.reset_session_ui()
@@ -963,32 +1233,42 @@ def main():
             sim_mode=args.sim,
             default_start=default_start,
         )
-        try:
-            dashboard.root.mainloop()
-        except KeyboardInterrupt:
-            print("\n⚠️ ผู้ใช้กด Ctrl+C ในหน้าจอ Terminal...")
-            state.stop_requested = True
-            if state.visited_cells:
-                try:
-                    cfg = dashboard.get_start_config() if dashboard else default_start
-                    _save_mission_map(cfg)
-                    save_outputs("emergency_stop")
-                    print(f"💾 บันทึกแผนที่ ({len(state.visited_cells)} ช่อง) และ Log การเดินเรียบร้อยแล้ว!")
-                except Exception as se:
-                    print(f"Error saving on Ctrl+C: {se}")
-        except Exception as e:
-            print(f"\n❌ [GUI EXCEPTION] หน้าต่าง GUI เกิดข้อผิดพลาด: {e}")
-            import traceback
-            traceback.print_exc()
-            state.stop_requested = True
-            if state.visited_cells:
-                try:
-                    cfg = dashboard.get_start_config() if dashboard else default_start
-                    _save_mission_map(cfg)
-                    save_outputs("emergency_crash_stop")
-                    print(f"💾 [CRASH RECOVERY] บันทึกแผนที่ฉุกเฉิน ({len(state.visited_cells)} ช่อง) เรียบร้อยแล้ว!")
-                except Exception as se:
-                    print(f"Error saving on crash: {se}")
+        if args.resume or args.mode in ("resume", "recover"):
+            dashboard.root.after(300, lambda: dashboard.handle_start_click("resume"))
+        while not dashboard.closed:
+            try:
+                dashboard.root.mainloop()
+                if not dashboard.closed and getattr(dashboard, "is_running", False):
+                    time.sleep(0.05)
+                    continue
+                break
+            except KeyboardInterrupt:
+                print("\n⚠️ ผู้ใช้กด Ctrl+C ในหน้าจอ Terminal...")
+                state.stop_requested = True
+                if state.visited_cells:
+                    try:
+                        cfg = dashboard.get_start_config() if dashboard else default_start
+                        _save_mission_map(cfg, round_name="emergency_stop")
+                        save_outputs("emergency_stop")
+                        print(f"💾 บันทึกแผนที่ ({len(state.visited_cells)} ช่อง) และ Log การเดินเรียบร้อยแล้ว!")
+                    except Exception as se:
+                        print(f"Error saving on Ctrl+C: {se}")
+                break
+            except Exception as e:
+                print(f"\n❌ [GUI EXCEPTION RECOVERED] หน้าต่าง GUI กู้คืนจากข้อผิดพลาด: {e}")
+                import traceback
+                traceback.print_exc()
+                if dashboard.closed:
+                    state.stop_requested = True
+                    if state.visited_cells:
+                        try:
+                            cfg = dashboard.get_start_config() if dashboard else default_start
+                            _save_mission_map(cfg, round_name="emergency_crash_stop")
+                            save_outputs("emergency_crash_stop")
+                            print(f"💾 [CRASH RECOVERY] บันทึกแผนที่ฉุกเฉิน ({len(state.visited_cells)} ช่อง) เรียบร้อยแล้ว!")
+                        except Exception as se:
+                            print(f"Error saving on crash: {se}")
+                    break
 
 
 if __name__ == "__main__":

@@ -25,8 +25,8 @@ GRID_SIZE_M = 0.60
 # Assignment rule: a target may be engaged only when it is at most two tiles
 # away. Keep this derived from the configured grid pitch.
 MAX_TARGET_RANGE_MM = int(2 * GRID_SIZE_M * 1000)
-SPEED = 0.42            # Smooth forward velocity speed (m/s) - increased for faster coverage
-ROT_SPEED = 65          # Precise turning speed (deg/s) - faster 90° rotations
+SPEED = 0.4            # Smooth forward velocity speed (m/s) - increased for faster coverage
+ROT_SPEED = 70          # Precise turning speed (deg/s) - faster 90° rotations
 RECENTER_SPEED = 0.28   # Smooth strafe recentering (m/s)
 GIMBAL_SPEED = 280      # Fast & smooth gimbal yaw speed (deg/s)
 ROUND1_LIMIT_S = 900    # Round 1 (SLAM) time limit in seconds (15 minutes)
@@ -42,15 +42,15 @@ IR_ACTIVE_LEVEL = 0
 IR_EVADE_SPEED_MPS = 0.10 
 IR_EVADE_ACCEL_MPS2 = 0.30
 WALL_THRESHOLD_MM = 550 # Distance <= 550mm indicates a foam wall on immediate cell border (open passages >= 700mm)
-RECENTER_WALL_MAX_MM = 400 # Use walls within 40cm for recentering
-TARGET_FRONT_WALL_DIST_MM = 150 # Target distance from front wall during recentering (15cm)
-TARGET_LATERAL_WALL_DIST_MM = 300 # Center of 60cm cell from left/right side walls (30cm)
-TARGET_WALL_DIST_MM = 150   # Default alias for backward compatibility (15cm)
-SAFE_MIN_MM = 280       # Minimum safe distance to a single side wall (mm)
-SAFE_MAX_MM = 300       # Maximum safe distance to a single side wall (mm)
-SAFE_FRONT_DIST_MM = 160 # Safe front distance threshold (160mm)
-FRONT_BRAKE_DIST_MM = 160 # Immediate front obstacle boundary (160mm)
-EMERGENCY_STOP_DIST_MM = 100 # Emergency collision stop threshold (100mm / 10cm - increased from 60mm)
+RECENTER_WALL_MAX_MM = 500 # Use walls within 50cm for recentering (allows detecting and comparing both walls across cell)
+TARGET_FRONT_WALL_DIST_MM = 180 # Target distance from front wall during recentering (18cm)
+TARGET_LATERAL_WALL_DIST_MM = 170 # Target distance from side walls (left/right) during recentering (17cm)
+TARGET_WALL_DIST_MM = 170   # Default alias for backward compatibility (17cm)
+SAFE_MIN_MM = 230       # Minimum safe distance to a single side wall (mm)
+SAFE_MAX_MM = 270       # Maximum safe distance to a single side wall (mm)
+SAFE_FRONT_DIST_MM = 200 # Safe front distance threshold (190mm)
+FRONT_BRAKE_DIST_MM = 200 # Immediate front obstacle boundary (190mm)
+EMERGENCY_STOP_DIST_MM = 250 # Emergency collision stop threshold (80mm / 8cm) - only triggers on actual obstacle hazard
 MAX_SHIFT_LATERAL_M = 0.06      # Max lateral shift allowed per cell (6cm limit to avoid colliding with side walls)
 MAX_SHIFT_LONGITUDINAL_M = 0.15 # Max longitudinal shift allowed per cell (15cm limit)
 DEADBAND_M = 0.020              # Deadband tolerance (2.0cm) - ignores minor offsets to prevent jitter

@@ -10,9 +10,10 @@ from collections import deque
 from config import DIRECTIONS, SIM_H_WALLS, SIM_V_WALLS, WALL_THRESHOLD_MM, adjacent, in_bounds
 import state
 
-# Turn penalty: ค่าปรับเมื่อหุ่นยนต์ต้องเลี้ยว (ยิ่งเลี้ยวมากยิ่งโดนปรับ)
-TURN_PENALTY_90 = 0.4    # หมุน 90° (เลี้ยวซ้าย/ขวา)
-TURN_PENALTY_180 = 1.0   # หมุนกลับหลัง 180°
+# Turn penalty: ค่าปรับเมื่อหุ่นยนต์ต้องเลี้ยว (ใช้เป็น Tie-breaker เท่านั้น ไม่ให้แซงระยะก้าว)
+TURN_PENALTY_90 = 0.05    # หมุน 90° (เลี้ยวซ้าย/ขวา)
+TURN_PENALTY_180 = 0.10   # หมุนกลับหลัง 180°
+STEP_COST = 100.0         # ต้นทุนหลักต่อก้าว (รับประกันว่าเส้นทางก้าวน้อยกว่าจะชนะเสมอ 100% ไม่เดินอ้อม)
 
 
 def is_wall_distance(dist):
@@ -71,8 +72,8 @@ def _heuristic(cell, goal):
 
 def astar_path(start, goal, current_heading=None):
     """
-    A* algorithm หาเส้นทางสั้นที่สุดจาก start ไป goal
-    โดยมี turn penalty (ค่าปรับการเลี้ยว) เพื่อให้หุ่นยนต์ไม่หมุนบ่อยเกินไป
+    A* algorithm หาเส้นทางสั้นที่สุดจาก start ไป goal โดยยึดจำนวนก้าวน้อยที่สุดเป็นหลัก
+    และใช้ turn penalty เป็นเพียงตัวตัดสินเมื่อจำนวนก้าวเท่ากัน (ไม่เดินอ้อม)
 
     Parameters:
         start: tuple (x, y) จุดเริ่มต้น
@@ -87,7 +88,7 @@ def astar_path(start, goal, current_heading=None):
 
     # Priority queue: (f_cost, counter, cell, heading)
     counter = 0
-    open_set = [(0 + _heuristic(start, goal), counter, start, current_heading)]
+    open_set = [(0.0 + _heuristic(start, goal) * STEP_COST, counter, start, current_heading)]
     g_cost = {(start, current_heading): 0.0}
     parent = {(start, current_heading): None}
 
@@ -111,14 +112,14 @@ def astar_path(start, goal, current_heading=None):
             if not in_bounds(nxt):
                 continue
 
-            # ต้นทุนเดิน 1 ก้าว + ค่าปรับเลี้ยว
-            move_cost = 1.0 + _turn_cost(curr_heading, d)
+            # ต้นทุนเดิน 1 ก้าว (STEP_COST=100) + ค่าปรับเลี้ยวเล็กน้อย
+            move_cost = STEP_COST + _turn_cost(curr_heading, d)
             new_g = g_cost[(curr, curr_heading)] + move_cost
 
             key_nxt = (nxt, d)
             if key_nxt not in g_cost or new_g < g_cost[key_nxt]:
                 g_cost[key_nxt] = new_g
-                f_new = new_g + _heuristic(nxt, goal)
+                f_new = new_g + _heuristic(nxt, goal) * STEP_COST
                 counter += 1
                 heapq.heappush(open_set, (f_new, counter, nxt, d))
                 parent[key_nxt] = (curr, curr_heading)
@@ -128,23 +129,39 @@ def astar_path(start, goal, current_heading=None):
 
 def find_path_to_nearest_unvisited(start, visited, current_heading=None):
     """
-    A* with turn penalty เพื่อหาเส้นทางที่สั้นที่สุดไปยังช่องที่ยังไม่ได้เยี่ยมชม
-    ถ้า current_heading = None จะ fallback เป็น BFS แบบเดิม (ไม่มี turn penalty)
+    ค้นหาเส้นทางสั้นที่สุด (ระยะก้าวน้อยที่สุดเสมอ) ไปยังช่องที่ยังไม่ได้เยี่ยมชม
+    1. ตรวจสอบช่องข้างเคียงติดกัน (1 ก้าว) ก่อนทันที หากมีช่องเปิดที่ยังไม่สำรวจ จะเลือกเดินเข้าทันที ไม่เดินอ้อม
+    2. หากช่องรอบตัวสำรวจหมดแล้ว จะใช้ Dijkstra ที่คำนวณจำนวนก้าวน้อยที่สุดเป็นหลัก (Step Cost 100)
+       รับประกันว่าจะเลือกช่องที่ใกล้ตัวที่สุดเสมอ ไม่เดินอ้อมไกล
     """
-    if current_heading is None:
-        # Fallback: BFS เดิม (ไม่มี turn penalty)
-        return _bfs_nearest_unvisited(start, visited)
+    # 1. ตรวจสอบช่องข้างเคียง (Immediate Neighbors) 1 ก้าวทันที
+    if current_heading is not None:
+        h_idx = DIRECTIONS.index(current_heading)
+        check_dirs = [
+            current_heading,
+            DIRECTIONS[(h_idx + 1) % 4],
+            DIRECTIONS[(h_idx - 1) % 4],
+            DIRECTIONS[(h_idx + 2) % 4],
+        ]
+    else:
+        check_dirs = DIRECTIONS
 
-    # A* with turn penalty
+    for d in check_dirs:
+        if not is_wall_between(start, d):
+            nxt = adjacent(start, d)
+            if in_bounds(nxt) and nxt not in visited:
+                return [start, nxt]
+
+    # 2. ค้นหาเส้นทางที่สั้นที่สุด (ก้าวน้อยที่สุด) ไปยังช่องที่ยังไม่เคยสำรวจ
     counter = 0
-    open_set = [(0, counter, start, current_heading)]
+    open_set = [(0.0, counter, start, current_heading)]
     g_cost = {(start, current_heading): 0.0}
     parent = {(start, current_heading): None}
 
     while open_set:
         f, _cnt, curr, curr_heading = heapq.heappop(open_set)
 
-        # Goal: ช่องที่ยังไม่ได้เยี่ยมชม (Unvisited frontier cell ที่เข้าถึงได้ผ่านทางเปิด)
+        # Goal: ช่องที่ยังไม่ได้เยี่ยมชม (Unvisited frontier cell)
         if curr not in visited:
             path = []
             key = (curr, curr_heading)
@@ -162,14 +179,15 @@ def find_path_to_nearest_unvisited(start, visited, current_heading=None):
             if not in_bounds(nxt):
                 continue
 
-            move_cost = 1.0 + _turn_cost(curr_heading, d)
+            # ต้นทุนก้าวละ 100.0 + ค่าปรับเลี้ยวเล็กน้อย (0.05/0.10)
+            # รับประกันว่าเส้นทางที่จำนวนก้าวน้อยกว่าจะชนะเสมอ 100% ไม่เดินอ้อม
+            move_cost = STEP_COST + _turn_cost(curr_heading, d)
             new_g = g_cost[(curr, curr_heading)] + move_cost
 
             key_nxt = (nxt, d)
             if key_nxt not in g_cost or new_g < g_cost[key_nxt]:
                 g_cost[key_nxt] = new_g
                 counter += 1
-                # ใช้ 0 เป็น heuristic เพราะไม่รู้ตำแหน่ง goal (หาช่องที่ใกล้ที่สุด)
                 heapq.heappush(open_set, (new_g, counter, nxt, d))
                 parent[key_nxt] = (curr, curr_heading)
 

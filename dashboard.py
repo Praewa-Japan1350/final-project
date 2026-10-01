@@ -40,6 +40,7 @@ class Dashboard:
         self._camera_pending_frame = None
         self._camera_callback_pending = False
         self._aim_reticle_active = False
+        self._camera_busy = False
         self._last_camera_frame = None
         self._last_camera_display = 0.0
         self._last_camera_source_frame_id = -1
@@ -343,13 +344,13 @@ class Dashboard:
         )
         self.btn_stop.pack(side=tk.RIGHT, padx=(2, 0))
 
-        # Buttons Frame - Row 2: Continuous (Round 1 ➔ Round 2) & CSV Map Upload
+        # Buttons Frame - Row 2: Continuous (Round 1 ➔ Round 2), Recovery/Resume, & CSV Map Upload
         btn_row2 = tk.Frame(panel, bg="#f8fafc")
         btn_row2.pack(fill=tk.X, pady=(0, 6))
 
         self.btn_auto_all = tk.Button(
             btn_row2,
-            text="🚀 รันต่อเนื่อง (รอบ 1 SLAM ➔ รอบ 2 A*)",
+            text="🚀 รันต่อเนื่อง (รอบ 1➔2)",
             bg="#059669",
             fg="#ffffff",
             font=("Segoe UI", 9, "bold"),
@@ -363,9 +364,25 @@ class Dashboard:
         )
         self.btn_auto_all.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 2))
 
+        self.btn_resume = tk.Button(
+            btn_row2,
+            text="🔄 กู้คืน/รันต่อ (Resume)",
+            bg="#0284c7",
+            fg="#ffffff",
+            font=("Segoe UI", 9, "bold"),
+            activebackground="#0369a1",
+            activeforeground="#ffffff",
+            relief=tk.FLAT,
+            padx=6,
+            pady=5,
+            cursor="hand2",
+            command=lambda: self.handle_start_click("resume"),
+        )
+        self.btn_resume.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=2)
+
         self.btn_load_csv = tk.Button(
             btn_row2,
-            text="📂 โหลดแผนที่ CSV",
+            text="📂 โหลด CSV",
             bg="#ea580c",
             fg="#ffffff",
             font=("Segoe UI", 9, "bold"),
@@ -537,9 +554,17 @@ class Dashboard:
         )
         self.btn_gallery.pack(side=tk.RIGHT, padx=(3, 0))
 
+        self.btn_clear_data = tk.Button(
+            results_toolbar, text="🧹 เคลียร์ข้อมูล", command=self.clear_data_and_logs,
+            bg="#d97706", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT,
+            padx=6, pady=3, cursor="hand2"
+        )
+        self.btn_clear_data.pack(side=tk.RIGHT, padx=(3, 0))
+
         self._camera_photo = None
-        self.root.after(100, self._refresh_camera)
-        self.root.after(35, self._drain_ui_queue)
+        self.root.after(200, self._refresh_camera)
+        self.root.after(30, self._drain_ui_queue)
+        self.root.after(30000, self._periodic_cleanup)
 
         # Target Results Gallery Storage & Window
         self.target_results = []
@@ -931,7 +956,7 @@ class Dashboard:
                 pass
             self._timer_tick_id = None
         if self._timer_running and not self.closed:
-            self._timer_tick_id = self.root.after(100, self._on_timer_tick)
+            self._timer_tick_id = self.root.after(250, self._on_timer_tick)
 
     def _on_timer_tick(self):
         self._timer_tick_id = None
@@ -1112,22 +1137,173 @@ class Dashboard:
     def handle_start_click(self, run_mode="mapping"):
         if self.is_running:
             return
+        state.stop_requested = False
         import config
-        gw = self.grid_w_var.get()
-        gh = self.grid_h_var.get()
-        pitch = self.grid_pitch_var.get()
-        config.set_grid_dimensions(gw, gh, pitch)
 
-        sx = self.start_x_var.get()
-        sy = self.start_y_var.get()
-        if not config.in_bounds((sx, sy)):
-            self.log(f"พิกัด ({sx}, {sy}) ไม่อยู่ในตาราง {gw}x{gh}!")
-            return
+        if run_mode == "resume":
+            try:
+                from slam import _load_mission_map
+                data = _load_mission_map()
+            except Exception as e:
+                self.log(f"❌ ไม่สามารถกู้คืนได้: {e}")
+                self.log("💡 หากต้องการเริ่มใหม่ ให้กด 'รอบ 1: เดินแบบ SLAM' หรือ 'รันต่อเนื่อง'")
+                return
+
+            gw = int(data.get("grid_width", self.grid_w_var.get()))
+            gh = int(data.get("grid_height", self.grid_h_var.get()))
+            pitch = float(data.get("grid_size_m", self.grid_pitch_var.get()))
+
+            last_pos = data.get("last_position")
+            if last_pos and len(last_pos) == 2:
+                sx, sy = int(last_pos[0]), int(last_pos[1])
+            else:
+                start_p = data.get("start_position", [self.start_x_var.get(), self.start_y_var.get()])
+                sx, sy = int(start_p[0]), int(start_p[1])
+
+            heading = data.get("last_heading") or data.get("start_heading") or self.start_heading_var.get()
+
+            self.grid_w_var.set(gw)
+            self.grid_h_var.set(gh)
+            self.grid_pitch_var.set(pitch)
+            self.start_x_var.set(sx)
+            self.start_y_var.set(sy)
+            self.start_heading_var.set(heading)
+            config.set_grid_dimensions(gw, gh, pitch)
+
+            state.detected_h_walls.clear()
+            state.detected_v_walls.clear()
+            state.detected_signs.clear()
+            state.discovered_cells.clear()
+            state.visited_cells.clear()
+            state.fired_targets.clear()
+
+            state.detected_h_walls.update([tuple(w) for w in data.get("h_walls", [])])
+            state.detected_v_walls.update([tuple(w) for w in data.get("v_walls", [])])
+            state.visited_cells.update([tuple(c) for c in data.get("visited_cells", [])])
+            state.discovered_cells.update([tuple(c) for c in data.get("discovered_cells", [])])
+            for t in data.get("targets", []):
+                key = (tuple(t["cell"]), t["direction"])
+                state.detected_signs[key] = t["signs"]
+            for f in data.get("fired_targets", []):
+                if isinstance(f, (list, tuple)) and len(f) >= 3:
+                    c = tuple(f[0]) if isinstance(f[0], (list, tuple)) else f[0]
+                    state.fired_targets.add((c, f[1], f[2]))
+                else:
+                    state.fired_targets.add(tuple(f) if isinstance(f, list) else f)
+
+            max_side = 530
+            self.cell_size = max(40, min(100, int((max_side - 2 * self.pad) / max(gw, gh))))
+            new_cw = self.pad * 2 + self.cell_size * gw
+            new_ch = self.pad * 2 + self.cell_size * gh
+            self.canvas.config(width=new_cw, height=new_ch)
+            self.redraw_preview()
+
+            step = data.get("step", 0)
+            self.log("=" * 60)
+            self.log("🔄 [RECOVERY] โหลด Checkpoint สำเร็จ!")
+            self.log(f"   ▸ พิกัดล่าสุด: ({sx}, {sy}) ทิศ {heading} (Step: {step})")
+            self.log(f"   ▸ สำรวจแล้ว: {len(state.visited_cells)} ช่อง, ค้นพบกำแพง: {len(state.detected_h_walls)+len(state.detected_v_walls)} จุด")
+            self.log(f"   ▸ เป้าหมายที่พบ: {len(data.get('targets', []))} จุด, ยิงแล้ว: {len(state.fired_targets)} จุด")
+            self.log("=" * 60)
+        elif run_mode in ("astar_only", "astar", "targets"):
+            # รอบที่ 2 (A*): โหลดแผนที่และตรวจสอบเป้าหมายก่อนเริ่ม
+            data = None
+            try:
+                from slam import _load_mission_map
+                data = _load_mission_map()
+            except Exception as e:
+                data = None
+
+            if data is None and not (state.detected_h_walls or state.detected_v_walls or state.detected_signs):
+                self.log("=" * 60)
+                self.log("⚠️ [รอบ 2 A*] ไม่สามารถเริ่มรอบ 2 ได้: ยังไม่มีข้อมูลแผนที่หรือเป้าหมายจากรอบ 1")
+                self.log("💡 กรุณารัน [🗺️ รอบ 1: เดินแบบ SLAM] ให้เสร็จก่อน หรือกดปุ่ม [📂 โหลด CSV]")
+                self.log("=" * 60)
+                return
+
+            if data:
+                gw = int(data.get("grid_width", self.grid_w_var.get()))
+                gh = int(data.get("grid_height", self.grid_h_var.get()))
+                pitch = float(data.get("grid_size_m", self.grid_pitch_var.get()))
+
+                sx = self.start_x_var.get()
+                sy = self.start_y_var.get()
+                heading = self.start_heading_var.get()
+
+                self.grid_w_var.set(gw)
+                self.grid_h_var.set(gh)
+                self.grid_pitch_var.set(pitch)
+                config.set_grid_dimensions(gw, gh, pitch)
+
+                state.detected_h_walls.clear()
+                state.detected_v_walls.clear()
+                state.detected_signs.clear()
+                state.discovered_cells.clear()
+                state.visited_cells.clear()
+                state.fired_targets.clear()
+
+                state.detected_h_walls.update([tuple(w) for w in data.get("h_walls", [])])
+                state.detected_v_walls.update([tuple(w) for w in data.get("v_walls", [])])
+                state.visited_cells.update([tuple(c) for c in data.get("visited_cells", [])])
+                state.discovered_cells.update([tuple(c) for c in data.get("discovered_cells", [])])
+                for t in data.get("targets", []):
+                    key = (tuple(t["cell"]), t["direction"])
+                    state.detected_signs[key] = t["signs"]
+                    for s in t.get("signs", []):
+                        img_p = s.get("image_path")
+                        if img_p and os.path.exists(img_p):
+                            meta = {
+                                "color": s.get("color", ""),
+                                "shape": s.get("shape", ""),
+                                "cell": tuple(t["cell"]),
+                                "direction": t["direction"],
+                                "fired": False,
+                                "area": s.get("area", 0),
+                                "time": time.strftime("%H:%M:%S")
+                            }
+                            self.add_target_result(img_p, meta)
+
+                max_side = 530
+                self.cell_size = max(40, min(100, int((max_side - 2 * self.pad) / max(gw, gh))))
+                new_cw = self.pad * 2 + self.cell_size * gw
+                new_ch = self.pad * 2 + self.cell_size * gh
+                self.canvas.config(width=new_cw, height=new_ch)
+                self.redraw_preview()
+
+                target_count = sum(len(s) for s in state.detected_signs.values())
+                self.log("=" * 60)
+                self.log("⭐ [รอบ 2 A*] โหลดแผนที่พร้อมเป้าหมายสำเร็จ!")
+                self.log(f"   ▸ จุดเริ่มต้น: ({sx}, {sy}) ทิศ {heading}")
+                self.log(f"   ▸ แผนที่: {gw}×{gh} ช่อง, กำแพง {len(state.detected_h_walls)+len(state.detected_v_walls)} แนว")
+                self.log(f"   ▸ เป้าหมายทั้งหมด: {target_count} จุด")
+                self.log("=" * 60)
+                if target_count == 0:
+                    self.log("⚠️ คำเตือน: แผนที่นี้ไม่พบเป้าหมาย กรุณาตรวจสอบหรือรันรอบ 1 ใหม่")
+                    return
+            else:
+                sx = self.start_x_var.get()
+                sy = self.start_y_var.get()
+                gw = self.grid_w_var.get()
+                gh = self.grid_h_var.get()
+                pitch = self.grid_pitch_var.get()
+        else:
+            gw = self.grid_w_var.get()
+            gh = self.grid_h_var.get()
+            pitch = self.grid_pitch_var.get()
+            config.set_grid_dimensions(gw, gh, pitch)
+
+            sx = self.start_x_var.get()
+            sy = self.start_y_var.get()
+            if not config.in_bounds((sx, sy)):
+                self.log(f"พิกัด ({sx}, {sy}) ไม่อยู่ในตาราง {gw}x{gh}!")
+                return
+
         self.is_running = True
         self.run_mode = run_mode
         self.btn_slam.config(state=tk.DISABLED, bg="#cbd5e1")
         self.btn_astar.config(state=tk.DISABLED, bg="#cbd5e1")
         self.btn_auto_all.config(state=tk.DISABLED, bg="#cbd5e1")
+        self.btn_resume.config(state=tk.DISABLED, bg="#cbd5e1")
         self.btn_load_csv.config(state=tk.DISABLED, bg="#cbd5e1")
         self.btn_stop.config(state=tk.NORMAL, bg="#e11d48")
         self.spin_w.config(state=tk.DISABLED)
@@ -1149,6 +1325,11 @@ class Dashboard:
             r_label = "รอบ 1 (SLAM)"
             self._round_times = {"round1": None, "round2": None, "total": None}
             self._mission_start_time = time.monotonic()
+        elif run_mode == "resume":
+            r_key = "round1"
+            r_label = "กู้คืน / รันต่อ"
+            if self._mission_start_time is None:
+                self._mission_start_time = time.monotonic()
         else:
             r_key = "round1"
             r_label = "รอบ 1 (SLAM)"
@@ -1158,6 +1339,7 @@ class Dashboard:
         start_config = (sx, sy, self.start_heading_var.get())
         mission_config = {
             "run_mode": run_mode,
+            "is_resume": (run_mode == "resume"),
             "grid_w": gw,
             "grid_h": gh,
             "cell_size_m": pitch,
@@ -1235,6 +1417,13 @@ class Dashboard:
 
     def close(self):
         """Handle window close event (clicking [X]). Guaranteed to save mission map & logs."""
+        if self.is_running:
+            import tkinter.messagebox as mb
+            try:
+                if not mb.askyesno("ยืนยันการปิดหน้าต่าง", "หุ่นยนต์กำลังทำงานอยู่ ต้องการหยุดภารกิจและปิดโปรแกรมใช่หรือไม่?"):
+                    return
+            except Exception:
+                pass
         state.stop_requested = True
         if self._timer_tick_id:
             try:
@@ -1270,6 +1459,7 @@ class Dashboard:
             self.btn_slam.config(state=tk.NORMAL, bg="#2563eb")
             self.btn_astar.config(state=tk.NORMAL, bg="#7c3aed")
             self.btn_auto_all.config(state=tk.NORMAL, bg="#059669")
+            self.btn_resume.config(state=tk.NORMAL, bg="#0284c7")
             self.btn_load_csv.config(state=tk.NORMAL, bg="#ea580c")
             self.btn_stop.config(state=tk.DISABLED, bg="#cbd5e1")
             self.spin_w.config(state=tk.NORMAL)
@@ -1290,21 +1480,35 @@ class Dashboard:
     def _show_camera_frame(self, frame):
         if self.closed or frame is None:
             return
-        self._last_camera_frame = frame.copy()
-        if self._aim_reticle_active:
-            frame = frame.copy()
-            height, width = frame.shape[:2]
-            center = (width // 2, height // 2)
-            cv2.drawMarker(frame, center, (0, 255, 255), cv2.MARKER_CROSS, 28, 2)
-            cv2.circle(frame, center, 16, (0, 255, 255), 1, cv2.LINE_AA)
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(rgb)
-        image.thumbnail((440, 240), Image.Resampling.BILINEAR)
-        self._camera_photo = ImageTk.PhotoImage(image)
+        if getattr(self, "_camera_busy", False):
+            return
+        self._camera_busy = True
         try:
-            self.camera_label.configure(image=self._camera_photo, text="")
-        except tk.TclError:
+            if self._aim_reticle_active:
+                frame = frame.copy()
+                height, width = frame.shape[:2]
+                center = (width // 2, height // 2)
+                cv2.drawMarker(frame, center, (0, 255, 255), cv2.MARKER_CROSS, 28, 2)
+                cv2.circle(frame, center, 16, (0, 255, 255), 1, cv2.LINE_AA)
+
+            # Fast fixed-size resize (400 x 225 pixels: 16:9, light on RAM and GDI memory)
+            resized_bgr = cv2.resize(frame, (400, 225), interpolation=cv2.INTER_LINEAR)
+            rgb = cv2.cvtColor(resized_bgr, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(rgb)
+
+            photo = ImageTk.PhotoImage(image)
+            old_photo = self._camera_photo
+            self._camera_photo = photo
+            self.camera_label.configure(image=photo, text="")
+            if old_photo is not None:
+                try:
+                    self.root.call("image", "delete", str(old_photo))
+                except Exception:
+                    pass
+        except Exception:
             pass
+        finally:
+            self._camera_busy = False
 
     def set_aim_reticle(self, active):
         """Show a camera-center reticle while the gimbal is aiming and firing."""
@@ -1312,8 +1516,6 @@ class Dashboard:
             return
         def update_reticle():
             self._aim_reticle_active = bool(active)
-            if self._last_camera_frame is not None:
-                self._show_camera_frame(self._last_camera_frame)
         self._post_ui(update_reticle, key="aim_reticle")
 
     def log(self, message):
@@ -1330,12 +1532,53 @@ class Dashboard:
         if not self.closed:
             def _append():
                 if not self.closed:
-                    self.logs.insert(tk.END, formatted + "\n")
-                    line_count = int(self.logs.index("end-1c").split(".")[0])
-                    if line_count > 1500:
-                        self.logs.delete("1.0", f"{line_count - 800}.0")
-                    self.logs.see(tk.END)
+                    try:
+                        self.logs.insert(tk.END, formatted + "\n")
+                        line_count = int(self.logs.index("end-1c").split(".")[0])
+                        if line_count > 150:
+                            self.logs.delete("1.0", f"{line_count - 100}.0")
+                        self.logs.see(tk.END)
+                    except Exception:
+                        pass
             self._post_ui(_append)
+
+    def clear_data_and_logs(self):
+        """Clear memory cache, prune logs, and run GC to keep GUI extremely stable during long runs."""
+        try:
+            self.logs.delete("1.0", tk.END)
+            with self._ui_coalesce_lock:
+                self._ui_coalesced.clear()
+                self._ui_coalesced_scheduled.clear()
+            self._last_camera_frame = None
+            import gc
+            gc.collect()
+            self.log("🧹 [CLEANUP] เคลียร์ข้อมูลและ Log ในหน่วยความจำเรียบร้อยแล้ว (GUI พร้อมทำงานต่อเนื่อง)")
+        except Exception as e:
+            print(f"[CLEANUP ERROR] {e}")
+
+    def _periodic_cleanup(self):
+        """Automatically prunes logs and runs GC every 30 seconds to prevent memory bloat and keep GUI alive."""
+        if self.closed:
+            return
+        try:
+            try:
+                line_count = int(self.logs.index("end-1c").split(".")[0])
+                if line_count > 150:
+                    self.logs.delete("1.0", f"{line_count - 100}.0")
+            except Exception:
+                pass
+
+            self._last_camera_frame = None
+            import gc
+            gc.collect()
+        except Exception:
+            pass
+        finally:
+            if not self.closed:
+                try:
+                    self.root.after(30000, self._periodic_cleanup)
+                except (tk.TclError, Exception):
+                    pass
 
     def add_target_result(self, filepath, metadata):
         """Register a new target snapshot into the dashboard gallery and update the preview card."""
@@ -1816,9 +2059,9 @@ class Dashboard:
     def _drain_ui_queue(self):
         if self.closed:
             return
-        # Process pending UI updates up to 25ms to keep UI responsive without backlog
+        # Process pending UI updates up to 15ms to keep UI snappy without starving Windows event pump
         start_t = time.monotonic()
-        while time.monotonic() - start_t < 0.025:
+        while time.monotonic() - start_t < 0.015:
             try:
                 callback = self._ui_queue.get_nowait()
             except queue.Empty:
@@ -1834,8 +2077,8 @@ class Dashboard:
             except Exception:
                 traceback.print_exc()
         try:
-            self.root.after(15, self._drain_ui_queue)
-        except tk.TclError:
+            self.root.after(30, self._drain_ui_queue)
+        except (tk.TclError, Exception):
             pass
 
     def _report_tk_callback_exception(self, exc_type, exc_value, exc_tb):
@@ -1854,12 +2097,12 @@ class Dashboard:
         if self.closed or frame is None:
             return
         now = time.monotonic()
-        if now - self._last_camera_display < 1 / 8:
+        if now - self._last_camera_display < 0.20:
             return
         self._last_camera_display = now
         try:
             self._show_camera_frame(frame)
-        except tk.TclError:
+        except Exception:
             pass
 
     def _refresh_camera(self):
@@ -1868,7 +2111,7 @@ class Dashboard:
         try:
             if self.vision_reader is not None:
                 now = time.monotonic()
-                if now - self._last_camera_display >= 0.10:  # Cap at 10 FPS
+                if now - self._last_camera_display >= 0.20:  # 5 FPS (smooth & lightweight)
                     from vision import crop_view
                     _frame_id, frame = self.vision_reader.latest()
                     if frame is not None and _frame_id != self._last_camera_source_frame_id:
@@ -1881,6 +2124,6 @@ class Dashboard:
         finally:
             if not self.closed:
                 try:
-                    self.root.after(100, self._refresh_camera)
-                except tk.TclError:
+                    self.root.after(200, self._refresh_camera)
+                except (tk.TclError, Exception):
                     pass

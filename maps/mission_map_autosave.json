@@ -1,0 +1,3773 @@
+{
+  "version": 4,
+  "grid_size_m": 0.6,
+  "grid_width": 6,
+  "grid_height": 6,
+  "start": [
+    2,
+    1,
+    "NORTH"
+  ],
+  "last_position": [
+    2,
+    5
+  ],
+  "last_heading": "SOUTH",
+  "step": 0,
+  "h_walls": [
+    [
+      1,
+      6
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      2
+    ],
+    [
+      5,
+      3
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      2
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "v_walls": [
+    [
+      0,
+      5
+    ],
+    [
+      0,
+      6
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      6,
+      5
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "discovered": [
+    [
+      1,
+      3
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      4,
+      2
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      4,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      3
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      6,
+      5
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "visited": [
+    [
+      1,
+      5
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      2,
+      6
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      4,
+      4
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      3
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      6,
+      5
+    ],
+    [
+      6,
+      6
+    ]
+  ],
+  "fired_targets": [
+    [
+      [
+        6,
+        6
+      ],
+      "green",
+      "horizontal"
+    ]
+  ],
+  "targets": [
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "SOUTH",
+      "signs": [
+        {
+          "color": "blue",
+          "label": "น้ำเงิน",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 3049.5,
+          "size_px": [
+            113,
+            107
+          ],
+          "bbox": [
+            1128,
+            544,
+            113,
+            107
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_3_3_SOUTH_blue_horizontal_det_20261001_112021.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "NORTH",
+      "signs": [
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "vertical",
+          "shape_label": "ผืนผ้าแนวตั้ง",
+          "area": 29967.5,
+          "size_px": [
+            195,
+            209
+          ],
+          "bbox": [
+            905,
+            239,
+            195,
+            209
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_NORTH_yellow_vertical_det_20261001_112204.jpg"
+        },
+        {
+          "color": "blue",
+          "label": "น้ำเงิน",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 24272.0,
+          "size_px": [
+            162,
+            159
+          ],
+          "bbox": [
+            602,
+            218,
+            162,
+            159
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_NORTH_blue_square_det_20261001_112204.jpg"
+        },
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 4129.0,
+          "size_px": [
+            122,
+            40
+          ],
+          "bbox": [
+            618,
+            504,
+            122,
+            40
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_NORTH_yellow_horizontal_det_20261001_112204.jpg"
+        },
+        {
+          "color": "green",
+          "label": "เขียว",
+          "shape": "circle",
+          "shape_label": "วงกลม",
+          "area": 18266.0,
+          "size_px": [
+            158,
+            152
+          ],
+          "bbox": [
+            305,
+            227,
+            158,
+            152
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_NORTH_green_circle_det_20261001_112204.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "EAST",
+      "signs": [
+        {
+          "color": "blue",
+          "label": "น้ำเงิน",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 41017.0,
+          "size_px": [
+            193,
+            246
+          ],
+          "bbox": [
+            695,
+            269,
+            193,
+            246
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_EAST_blue_square_det_20261001_112207.jpg"
+        },
+        {
+          "color": "green",
+          "label": "เขียว",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 37743.0,
+          "size_px": [
+            251,
+            161
+          ],
+          "bbox": [
+            322,
+            258,
+            251,
+            161
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_EAST_green_horizontal_det_20261001_112207.jpg"
+        },
+        {
+          "color": "red",
+          "label": "แดง",
+          "shape": "circle",
+          "shape_label": "วงกลม",
+          "area": 12556.5,
+          "size_px": [
+            97,
+            175
+          ],
+          "bbox": [
+            38,
+            278,
+            97,
+            175
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_EAST_red_circle_det_20261001_112207.jpg"
+        },
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 5875.0,
+          "size_px": [
+            134,
+            69
+          ],
+          "bbox": [
+            706,
+            602,
+            134,
+            69
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_6_6_EAST_yellow_horizontal_det_20261001_112207.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "NORTH",
+      "signs": [
+        {
+          "color": "red",
+          "label": "แดง",
+          "shape": "vertical",
+          "shape_label": "ผืนผ้าแนวตั้ง",
+          "area": 69003.5,
+          "size_px": [
+            287,
+            335
+          ],
+          "bbox": [
+            105,
+            350,
+            287,
+            335
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_4_6_NORTH_red_vertical_det_20261001_112246.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        3,
+        6
+      ],
+      "direction": "WEST",
+      "signs": [
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 37955.5,
+          "size_px": [
+            275,
+            211
+          ],
+          "bbox": [
+            38,
+            335,
+            275,
+            211
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_3_6_WEST_yellow_horizontal_det_20261001_112300.jpg"
+        },
+        {
+          "color": "blue",
+          "label": "น้ำเงิน",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 60458.5,
+          "size_px": [
+            318,
+            238
+          ],
+          "bbox": [
+            906,
+            304,
+            318,
+            238
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_3_6_WEST_blue_square_det_20261001_112300.jpg"
+        },
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 61370.5,
+          "size_px": [
+            237,
+            299
+          ],
+          "bbox": [
+            485,
+            311,
+            237,
+            299
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_3_6_WEST_yellow_square_det_20261001_112300.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "SOUTH",
+      "signs": [
+        {
+          "color": "blue",
+          "label": "น้ำเงิน",
+          "shape": "vertical",
+          "shape_label": "ผืนผ้าแนวตั้ง",
+          "area": 34593.0,
+          "size_px": [
+            215,
+            222
+          ],
+          "bbox": [
+            959,
+            254,
+            215,
+            222
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_4_4_SOUTH_blue_vertical_det_20261001_112347.jpg"
+        },
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 32114.0,
+          "size_px": [
+            274,
+            146
+          ],
+          "bbox": [
+            89,
+            258,
+            274,
+            146
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_4_4_SOUTH_yellow_horizontal_det_20261001_112347.jpg"
+        },
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 31922.0,
+          "size_px": [
+            188,
+            181
+          ],
+          "bbox": [
+            544,
+            239,
+            188,
+            181
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_4_4_SOUTH_yellow_square_det_20261001_112347.jpg"
+        }
+      ]
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "EAST",
+      "signs": [
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "horizontal",
+          "shape_label": "ผืนผ้าแนวนอน",
+          "area": 89569.0,
+          "size_px": [
+            422,
+            237
+          ],
+          "bbox": [
+            98,
+            346,
+            422,
+            237
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_2_6_EAST_yellow_horizontal_det_20261001_112554.jpg"
+        },
+        {
+          "color": "yellow",
+          "label": "เหลือง",
+          "shape": "square",
+          "shape_label": "จัตุรัส",
+          "area": 76245.0,
+          "size_px": [
+            325,
+            274
+          ],
+          "bbox": [
+            789,
+            330,
+            325,
+            274
+          ],
+          "votes": 6,
+          "frames_used": 6,
+          "confidence": 1.0,
+          "image_path": "c:\\Users\\praew\\Documents\\ROBOT\\slam-main\\results\\targets\\target_2_6_EAST_yellow_square_det_20261001_112554.jpg"
+        }
+      ]
+    }
+  ],
+  "color_scans": [
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "blue",
+          "shape": "horizontal",
+          "votes": 1,
+          "confidence": 0.16666666666666666
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 6,
+          "color": "blue",
+          "shape": "horizontal",
+          "area": 5678.0,
+          "size_px": [
+            129,
+            84
+          ],
+          "bbox": [
+            601,
+            469,
+            129,
+            84
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "blue",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "blue",
+          "shape": "horizontal",
+          "area": 3033.5,
+          "size_px": [
+            113,
+            106
+          ],
+          "bbox": [
+            1128,
+            545,
+            113,
+            106
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "blue",
+          "shape": "horizontal",
+          "area": 3065.5,
+          "size_px": [
+            113,
+            106
+          ],
+          "bbox": [
+            1128,
+            544,
+            113,
+            106
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "blue",
+          "shape": "horizontal",
+          "area": 3049.5,
+          "size_px": [
+            113,
+            107
+          ],
+          "bbox": [
+            1128,
+            544,
+            113,
+            107
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "blue",
+          "shape": "horizontal",
+          "area": 3060.5,
+          "size_px": [
+            113,
+            107
+          ],
+          "bbox": [
+            1128,
+            544,
+            113,
+            107
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "blue",
+          "shape": "horizontal",
+          "area": 3049.5,
+          "size_px": [
+            113,
+            105
+          ],
+          "bbox": [
+            1128,
+            545,
+            113,
+            105
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "blue",
+          "shape": "horizontal",
+          "area": 3056.5,
+          "size_px": [
+            113,
+            106
+          ],
+          "bbox": [
+            1128,
+            545,
+            113,
+            106
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "blue",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "green",
+          "shape": "circle",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "vertical",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "vertical",
+          "area": 29968.0,
+          "size_px": [
+            195,
+            209
+          ],
+          "bbox": [
+            904,
+            239,
+            195,
+            209
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "blue",
+          "shape": "square",
+          "area": 24270.0,
+          "size_px": [
+            162,
+            159
+          ],
+          "bbox": [
+            602,
+            218,
+            162,
+            159
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 4129.0,
+          "size_px": [
+            122,
+            40
+          ],
+          "bbox": [
+            618,
+            504,
+            122,
+            40
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "green",
+          "shape": "circle",
+          "area": 18270.5,
+          "size_px": [
+            159,
+            152
+          ],
+          "bbox": [
+            305,
+            227,
+            159,
+            152
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "vertical",
+          "area": 29966.0,
+          "size_px": [
+            195,
+            209
+          ],
+          "bbox": [
+            904,
+            239,
+            195,
+            209
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "blue",
+          "shape": "square",
+          "area": 24272.0,
+          "size_px": [
+            162,
+            159
+          ],
+          "bbox": [
+            602,
+            218,
+            162,
+            159
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 4112.5,
+          "size_px": [
+            122,
+            40
+          ],
+          "bbox": [
+            618,
+            504,
+            122,
+            40
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "green",
+          "shape": "circle",
+          "area": 18269.5,
+          "size_px": [
+            158,
+            152
+          ],
+          "bbox": [
+            305,
+            227,
+            158,
+            152
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "vertical",
+          "area": 29972.0,
+          "size_px": [
+            195,
+            209
+          ],
+          "bbox": [
+            904,
+            239,
+            195,
+            209
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "blue",
+          "shape": "square",
+          "area": 24272.0,
+          "size_px": [
+            162,
+            159
+          ],
+          "bbox": [
+            602,
+            218,
+            162,
+            159
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 4121.5,
+          "size_px": [
+            122,
+            40
+          ],
+          "bbox": [
+            618,
+            504,
+            122,
+            40
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "green",
+          "shape": "circle",
+          "area": 18266.0,
+          "size_px": [
+            158,
+            152
+          ],
+          "bbox": [
+            305,
+            227,
+            158,
+            152
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "vertical",
+          "area": 29951.5,
+          "size_px": [
+            194,
+            209
+          ],
+          "bbox": [
+            905,
+            239,
+            194,
+            209
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "blue",
+          "shape": "square",
+          "area": 24324.0,
+          "size_px": [
+            162,
+            159
+          ],
+          "bbox": [
+            602,
+            218,
+            162,
+            159
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 4129.5,
+          "size_px": [
+            122,
+            41
+          ],
+          "bbox": [
+            618,
+            503,
+            122,
+            41
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "green",
+          "shape": "circle",
+          "area": 18160.0,
+          "size_px": [
+            159,
+            151
+          ],
+          "bbox": [
+            304,
+            228,
+            159,
+            151
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "blue",
+          "shape": "square",
+          "area": 24325.5,
+          "size_px": [
+            162,
+            159
+          ],
+          "bbox": [
+            602,
+            218,
+            162,
+            159
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 4129.0,
+          "size_px": [
+            122,
+            41
+          ],
+          "bbox": [
+            618,
+            503,
+            122,
+            41
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "vertical",
+          "area": 29967.5,
+          "size_px": [
+            195,
+            209
+          ],
+          "bbox": [
+            905,
+            239,
+            195,
+            209
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "green",
+          "shape": "circle",
+          "area": 18168.0,
+          "size_px": [
+            159,
+            151
+          ],
+          "bbox": [
+            304,
+            228,
+            159,
+            151
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "blue",
+          "shape": "square",
+          "area": 24324.5,
+          "size_px": [
+            162,
+            159
+          ],
+          "bbox": [
+            602,
+            218,
+            162,
+            159
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 4128.0,
+          "size_px": [
+            122,
+            41
+          ],
+          "bbox": [
+            618,
+            503,
+            122,
+            41
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "vertical",
+          "area": 29967.5,
+          "size_px": [
+            195,
+            209
+          ],
+          "bbox": [
+            905,
+            239,
+            195,
+            209
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "green",
+          "shape": "circle",
+          "area": 18185.5,
+          "size_px": [
+            159,
+            151
+          ],
+          "bbox": [
+            304,
+            228,
+            159,
+            151
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "blue",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "green",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "red",
+          "shape": "circle",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "blue",
+          "shape": "square",
+          "area": 41017.0,
+          "size_px": [
+            193,
+            246
+          ],
+          "bbox": [
+            695,
+            269,
+            193,
+            246
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "green",
+          "shape": "horizontal",
+          "area": 37763.5,
+          "size_px": [
+            251,
+            161
+          ],
+          "bbox": [
+            322,
+            258,
+            251,
+            161
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "red",
+          "shape": "circle",
+          "area": 12462.0,
+          "size_px": [
+            96,
+            175
+          ],
+          "bbox": [
+            38,
+            278,
+            96,
+            175
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 5863.5,
+          "size_px": [
+            134,
+            69
+          ],
+          "bbox": [
+            706,
+            602,
+            134,
+            69
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "blue",
+          "shape": "square",
+          "area": 41029.0,
+          "size_px": [
+            193,
+            246
+          ],
+          "bbox": [
+            695,
+            269,
+            193,
+            246
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "green",
+          "shape": "horizontal",
+          "area": 37743.0,
+          "size_px": [
+            251,
+            161
+          ],
+          "bbox": [
+            322,
+            258,
+            251,
+            161
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "red",
+          "shape": "circle",
+          "area": 12541.5,
+          "size_px": [
+            96,
+            175
+          ],
+          "bbox": [
+            38,
+            278,
+            96,
+            175
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 5875.0,
+          "size_px": [
+            134,
+            69
+          ],
+          "bbox": [
+            706,
+            602,
+            134,
+            69
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "blue",
+          "shape": "square",
+          "area": 41040.0,
+          "size_px": [
+            193,
+            246
+          ],
+          "bbox": [
+            695,
+            269,
+            193,
+            246
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "green",
+          "shape": "horizontal",
+          "area": 37752.0,
+          "size_px": [
+            251,
+            161
+          ],
+          "bbox": [
+            322,
+            258,
+            251,
+            161
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "red",
+          "shape": "circle",
+          "area": 12556.5,
+          "size_px": [
+            97,
+            175
+          ],
+          "bbox": [
+            38,
+            278,
+            97,
+            175
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 5879.5,
+          "size_px": [
+            134,
+            69
+          ],
+          "bbox": [
+            706,
+            602,
+            134,
+            69
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "blue",
+          "shape": "square",
+          "area": 41060.0,
+          "size_px": [
+            193,
+            246
+          ],
+          "bbox": [
+            695,
+            269,
+            193,
+            246
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "green",
+          "shape": "horizontal",
+          "area": 37743.0,
+          "size_px": [
+            251,
+            161
+          ],
+          "bbox": [
+            322,
+            258,
+            251,
+            161
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "red",
+          "shape": "circle",
+          "area": 12569.0,
+          "size_px": [
+            97,
+            175
+          ],
+          "bbox": [
+            38,
+            278,
+            97,
+            175
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 5879.5,
+          "size_px": [
+            134,
+            69
+          ],
+          "bbox": [
+            706,
+            602,
+            134,
+            69
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "blue",
+          "shape": "square",
+          "area": 40972.0,
+          "size_px": [
+            192,
+            245
+          ],
+          "bbox": [
+            696,
+            270,
+            192,
+            245
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "green",
+          "shape": "horizontal",
+          "area": 37622.0,
+          "size_px": [
+            252,
+            160
+          ],
+          "bbox": [
+            322,
+            259,
+            252,
+            160
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "red",
+          "shape": "circle",
+          "area": 12607.0,
+          "size_px": [
+            97,
+            175
+          ],
+          "bbox": [
+            38,
+            278,
+            97,
+            175
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 5870.5,
+          "size_px": [
+            135,
+            70
+          ],
+          "bbox": [
+            705,
+            601,
+            135,
+            70
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "blue",
+          "shape": "square",
+          "area": 40969.0,
+          "size_px": [
+            192,
+            246
+          ],
+          "bbox": [
+            696,
+            269,
+            192,
+            246
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "green",
+          "shape": "horizontal",
+          "area": 37636.5,
+          "size_px": [
+            252,
+            160
+          ],
+          "bbox": [
+            322,
+            259,
+            252,
+            160
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "red",
+          "shape": "circle",
+          "area": 12619.0,
+          "size_px": [
+            97,
+            175
+          ],
+          "bbox": [
+            38,
+            278,
+            97,
+            175
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 5922.5,
+          "size_px": [
+            136,
+            69
+          ],
+          "bbox": [
+            705,
+            601,
+            136,
+            69
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "red",
+          "shape": "vertical",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "red",
+          "shape": "vertical",
+          "area": 61607.5,
+          "size_px": [
+            280,
+            300
+          ],
+          "bbox": [
+            112,
+            398,
+            280,
+            300
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "red",
+          "shape": "vertical",
+          "area": 69050.0,
+          "size_px": [
+            287,
+            335
+          ],
+          "bbox": [
+            105,
+            350,
+            287,
+            335
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "red",
+          "shape": "vertical",
+          "area": 69007.0,
+          "size_px": [
+            287,
+            335
+          ],
+          "bbox": [
+            105,
+            350,
+            287,
+            335
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "red",
+          "shape": "vertical",
+          "area": 69003.5,
+          "size_px": [
+            287,
+            335
+          ],
+          "bbox": [
+            105,
+            350,
+            287,
+            335
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "red",
+          "shape": "vertical",
+          "area": 68890.0,
+          "size_px": [
+            287,
+            335
+          ],
+          "bbox": [
+            105,
+            350,
+            287,
+            335
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "red",
+          "shape": "vertical",
+          "area": 68996.0,
+          "size_px": [
+            286,
+            336
+          ],
+          "bbox": [
+            106,
+            350,
+            286,
+            336
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        6
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        6
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "blue",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 37858.5,
+          "size_px": [
+            274,
+            212
+          ],
+          "bbox": [
+            38,
+            335,
+            274,
+            212
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "blue",
+          "shape": "square",
+          "area": 60168.5,
+          "size_px": [
+            317,
+            237
+          ],
+          "bbox": [
+            907,
+            304,
+            317,
+            237
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "square",
+          "area": 61340.5,
+          "size_px": [
+            237,
+            298
+          ],
+          "bbox": [
+            485,
+            311,
+            237,
+            298
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 37974.5,
+          "size_px": [
+            275,
+            211
+          ],
+          "bbox": [
+            38,
+            335,
+            275,
+            211
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "blue",
+          "shape": "square",
+          "area": 60294.5,
+          "size_px": [
+            317,
+            238
+          ],
+          "bbox": [
+            907,
+            304,
+            317,
+            238
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "square",
+          "area": 61403.5,
+          "size_px": [
+            237,
+            298
+          ],
+          "bbox": [
+            485,
+            311,
+            237,
+            298
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "blue",
+          "shape": "square",
+          "area": 60458.5,
+          "size_px": [
+            318,
+            238
+          ],
+          "bbox": [
+            906,
+            304,
+            318,
+            238
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 37955.5,
+          "size_px": [
+            275,
+            211
+          ],
+          "bbox": [
+            38,
+            335,
+            275,
+            211
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "square",
+          "area": 61370.5,
+          "size_px": [
+            237,
+            299
+          ],
+          "bbox": [
+            485,
+            311,
+            237,
+            299
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 37952.5,
+          "size_px": [
+            275,
+            211
+          ],
+          "bbox": [
+            38,
+            335,
+            275,
+            211
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "blue",
+          "shape": "square",
+          "area": 60459.5,
+          "size_px": [
+            318,
+            238
+          ],
+          "bbox": [
+            906,
+            304,
+            318,
+            238
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "square",
+          "area": 61369.0,
+          "size_px": [
+            237,
+            299
+          ],
+          "bbox": [
+            485,
+            311,
+            237,
+            299
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "blue",
+          "shape": "square",
+          "area": 60503.5,
+          "size_px": [
+            318,
+            237
+          ],
+          "bbox": [
+            906,
+            304,
+            318,
+            237
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 37959.5,
+          "size_px": [
+            275,
+            211
+          ],
+          "bbox": [
+            38,
+            335,
+            275,
+            211
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "square",
+          "area": 61371.5,
+          "size_px": [
+            237,
+            298
+          ],
+          "bbox": [
+            485,
+            311,
+            237,
+            298
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "blue",
+          "shape": "square",
+          "area": 60500.5,
+          "size_px": [
+            318,
+            237
+          ],
+          "bbox": [
+            906,
+            304,
+            318,
+            237
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 37956.0,
+          "size_px": [
+            275,
+            210
+          ],
+          "bbox": [
+            38,
+            336,
+            275,
+            210
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "square",
+          "area": 61343.0,
+          "size_px": [
+            237,
+            299
+          ],
+          "bbox": [
+            485,
+            311,
+            237,
+            299
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        3,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        6
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "blue",
+          "shape": "vertical",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "blue",
+          "shape": "vertical",
+          "area": 34638.5,
+          "size_px": [
+            216,
+            221
+          ],
+          "bbox": [
+            959,
+            254,
+            216,
+            221
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 32059.5,
+          "size_px": [
+            272,
+            146
+          ],
+          "bbox": [
+            89,
+            258,
+            272,
+            146
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "square",
+          "area": 31916.0,
+          "size_px": [
+            188,
+            181
+          ],
+          "bbox": [
+            544,
+            239,
+            188,
+            181
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "blue",
+          "shape": "vertical",
+          "area": 34540.5,
+          "size_px": [
+            216,
+            221
+          ],
+          "bbox": [
+            959,
+            254,
+            216,
+            221
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "square",
+          "area": 31922.0,
+          "size_px": [
+            188,
+            181
+          ],
+          "bbox": [
+            544,
+            239,
+            188,
+            181
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 32132.5,
+          "size_px": [
+            273,
+            146
+          ],
+          "bbox": [
+            88,
+            258,
+            273,
+            146
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "blue",
+          "shape": "vertical",
+          "area": 34555.5,
+          "size_px": [
+            216,
+            221
+          ],
+          "bbox": [
+            959,
+            254,
+            216,
+            221
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "square",
+          "area": 31910.0,
+          "size_px": [
+            188,
+            181
+          ],
+          "bbox": [
+            544,
+            239,
+            188,
+            181
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 32138.5,
+          "size_px": [
+            273,
+            146
+          ],
+          "bbox": [
+            88,
+            258,
+            273,
+            146
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "blue",
+          "shape": "vertical",
+          "area": 34593.0,
+          "size_px": [
+            215,
+            222
+          ],
+          "bbox": [
+            959,
+            254,
+            215,
+            222
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 32088.0,
+          "size_px": [
+            274,
+            146
+          ],
+          "bbox": [
+            89,
+            258,
+            274,
+            146
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "square",
+          "area": 31929.0,
+          "size_px": [
+            188,
+            181
+          ],
+          "bbox": [
+            544,
+            239,
+            188,
+            181
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "blue",
+          "shape": "vertical",
+          "area": 34616.0,
+          "size_px": [
+            215,
+            222
+          ],
+          "bbox": [
+            959,
+            254,
+            215,
+            222
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 32114.0,
+          "size_px": [
+            274,
+            146
+          ],
+          "bbox": [
+            89,
+            258,
+            274,
+            146
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "square",
+          "area": 31931.0,
+          "size_px": [
+            188,
+            180
+          ],
+          "bbox": [
+            544,
+            240,
+            188,
+            180
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "blue",
+          "shape": "vertical",
+          "area": 34619.0,
+          "size_px": [
+            215,
+            222
+          ],
+          "bbox": [
+            959,
+            254,
+            215,
+            222
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 32120.5,
+          "size_px": [
+            274,
+            146
+          ],
+          "bbox": [
+            89,
+            258,
+            274,
+            146
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "square",
+          "area": 31927.0,
+          "size_px": [
+            188,
+            180
+          ],
+          "bbox": [
+            544,
+            240,
+            188,
+            180
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at FRONT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "direction": "SOUTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "NORTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "direction": "WEST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "EAST",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [
+        {
+          "color": "yellow",
+          "shape": "horizontal",
+          "votes": 6,
+          "confidence": 1.0
+        },
+        {
+          "color": "yellow",
+          "shape": "square",
+          "votes": 6,
+          "confidence": 1.0
+        }
+      ],
+      "frame_detections": [
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 89504.0,
+          "size_px": [
+            421,
+            238
+          ],
+          "bbox": [
+            99,
+            345,
+            421,
+            238
+          ]
+        },
+        {
+          "frame": 1,
+          "color": "yellow",
+          "shape": "square",
+          "area": 76230.5,
+          "size_px": [
+            325,
+            274
+          ],
+          "bbox": [
+            790,
+            330,
+            325,
+            274
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 89401.0,
+          "size_px": [
+            421,
+            238
+          ],
+          "bbox": [
+            99,
+            345,
+            421,
+            238
+          ]
+        },
+        {
+          "frame": 2,
+          "color": "yellow",
+          "shape": "square",
+          "area": 76163.5,
+          "size_px": [
+            325,
+            273
+          ],
+          "bbox": [
+            790,
+            330,
+            325,
+            273
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "square",
+          "area": 76352.5,
+          "size_px": [
+            324,
+            275
+          ],
+          "bbox": [
+            790,
+            329,
+            324,
+            275
+          ]
+        },
+        {
+          "frame": 3,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 89674.5,
+          "size_px": [
+            421,
+            237
+          ],
+          "bbox": [
+            99,
+            345,
+            421,
+            237
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 89595.5,
+          "size_px": [
+            421,
+            237
+          ],
+          "bbox": [
+            99,
+            345,
+            421,
+            237
+          ]
+        },
+        {
+          "frame": 4,
+          "color": "yellow",
+          "shape": "square",
+          "area": 76310.5,
+          "size_px": [
+            324,
+            275
+          ],
+          "bbox": [
+            790,
+            329,
+            324,
+            275
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 89569.0,
+          "size_px": [
+            422,
+            237
+          ],
+          "bbox": [
+            98,
+            346,
+            422,
+            237
+          ]
+        },
+        {
+          "frame": 5,
+          "color": "yellow",
+          "shape": "square",
+          "area": 76245.0,
+          "size_px": [
+            325,
+            274
+          ],
+          "bbox": [
+            789,
+            330,
+            325,
+            274
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "horizontal",
+          "area": 89584.0,
+          "size_px": [
+            422,
+            237
+          ],
+          "bbox": [
+            98,
+            346,
+            422,
+            237
+          ]
+        },
+        {
+          "frame": 6,
+          "color": "yellow",
+          "shape": "square",
+          "area": 76252.5,
+          "size_px": [
+            325,
+            274
+          ],
+          "bbox": [
+            789,
+            330,
+            325,
+            274
+          ]
+        }
+      ]
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    }
+  ],
+  "trajectory": [
+    {
+      "step": 0,
+      "grid_x": 2,
+      "grid_y": 1,
+      "heading": "NORTH"
+    },
+    {
+      "step": 1,
+      "grid_x": 2,
+      "grid_y": 2,
+      "heading": "NORTH"
+    },
+    {
+      "step": 2,
+      "grid_x": 2,
+      "grid_y": 3,
+      "heading": "NORTH"
+    },
+    {
+      "step": 3,
+      "grid_x": 2,
+      "grid_y": 4,
+      "heading": "NORTH"
+    },
+    {
+      "step": 4,
+      "grid_x": 3,
+      "grid_y": 4,
+      "heading": "EAST"
+    },
+    {
+      "step": 5,
+      "grid_x": 3,
+      "grid_y": 3,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 6,
+      "grid_x": 4,
+      "grid_y": 3,
+      "heading": "EAST"
+    },
+    {
+      "step": 7,
+      "grid_x": 5,
+      "grid_y": 3,
+      "heading": "EAST"
+    },
+    {
+      "step": 8,
+      "grid_x": 6,
+      "grid_y": 3,
+      "heading": "EAST"
+    },
+    {
+      "step": 9,
+      "grid_x": 6,
+      "grid_y": 4,
+      "heading": "NORTH"
+    },
+    {
+      "step": 10,
+      "grid_x": 6,
+      "grid_y": 5,
+      "heading": "NORTH"
+    },
+    {
+      "step": 11,
+      "grid_x": 6,
+      "grid_y": 6,
+      "heading": "NORTH"
+    },
+    {
+      "step": 12,
+      "grid_x": 5,
+      "grid_y": 6,
+      "heading": "WEST"
+    },
+    {
+      "step": 13,
+      "grid_x": 4,
+      "grid_y": 6,
+      "heading": "WEST"
+    },
+    {
+      "step": 14,
+      "grid_x": 3,
+      "grid_y": 6,
+      "heading": "WEST"
+    },
+    {
+      "step": 15,
+      "grid_x": 4,
+      "grid_y": 6,
+      "heading": "EAST"
+    },
+    {
+      "step": 16,
+      "grid_x": 4,
+      "grid_y": 5,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 17,
+      "grid_x": 4,
+      "grid_y": 4,
+      "heading": "SOUTH"
+    },
+    {
+      "step": 18,
+      "grid_x": 5,
+      "grid_y": 4,
+      "heading": "EAST"
+    },
+    {
+      "step": 19,
+      "grid_x": 4,
+      "grid_y": 4,
+      "heading": "WEST"
+    },
+    {
+      "step": 20,
+      "grid_x": 4,
+      "grid_y": 5,
+      "heading": "NORTH"
+    },
+    {
+      "step": 21,
+      "grid_x": 3,
+      "grid_y": 5,
+      "heading": "WEST"
+    },
+    {
+      "step": 22,
+      "grid_x": 2,
+      "grid_y": 5,
+      "heading": "WEST"
+    },
+    {
+      "step": 23,
+      "grid_x": 1,
+      "grid_y": 5,
+      "heading": "WEST"
+    },
+    {
+      "step": 24,
+      "grid_x": 1,
+      "grid_y": 6,
+      "heading": "NORTH"
+    },
+    {
+      "step": 25,
+      "grid_x": 2,
+      "grid_y": 6,
+      "heading": "EAST"
+    },
+    {
+      "step": 26,
+      "grid_x": 2,
+      "grid_y": 5,
+      "heading": "SOUTH"
+    }
+  ]
+}

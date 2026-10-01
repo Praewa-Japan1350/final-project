@@ -1,0 +1,88 @@
+{
+  "version": 4,
+  "grid_size_m": 0.6,
+  "grid_width": 6,
+  "grid_height": 6,
+  "start": [
+    2,
+    4,
+    "NORTH"
+  ],
+  "last_position": [
+    2,
+    4
+  ],
+  "last_heading": "NORTH",
+  "step": 0,
+  "h_walls": [
+    [
+      2,
+      4
+    ]
+  ],
+  "v_walls": [],
+  "discovered": [
+    [
+      1,
+      4
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      3,
+      4
+    ]
+  ],
+  "visited": [
+    [
+      2,
+      4
+    ]
+  ],
+  "fired_targets": [],
+  "targets": [],
+  "color_scans": [
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "SOUTH",
+      "skipped": true,
+      "skip_reason": "Back scan disabled"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "NORTH",
+      "frames_expected": 6,
+      "frames_used": 6,
+      "minimum_votes": 4,
+      "votes": [],
+      "frame_detections": []
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "EAST",
+      "skipped": true,
+      "skip_reason": "No wall at RIGHT (open passage - background ignored)"
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "direction": "WEST",
+      "skipped": true,
+      "skip_reason": "No wall at LEFT (open passage - background ignored)"
+    }
+  ],
+  "trajectory": []
+}
