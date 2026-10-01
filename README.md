@@ -40,17 +40,7 @@
 - **ระบบจับเวลาภารกิจแต่ละรอบ (Stopwatch)** เริ่มนับเวลาทันทีที่กดรัน บันทึกเวลาแยกรอบ 1, รอบ 2 และเวลารวม
 - **หน้าจอ Dashboard สด (Tkinter GUI)** แสดงผลแผนที่ ตำแหน่งหุ่น ทิศทางกล้อง ภาพกล้องสด แกลเลอรีภาพถ่ายเป้าหมาย และระบบโหลดแผนที่ CSV
 
-```mermaid
-graph TD
-    User([ผู้ใช้งาน]) --> GUI[Tkinter GUI Dashboard]
-    GUI -->|กดรัน / ตั้งค่า| Controller[Slam Coordinator - slam.py]
-    Controller -->|ควบคุมการเคลื่อนที่ / ToF / Blaster| Robot[RoboMaster EP / Simulator]
-    Controller -->|ดึงเฟรมภาพ & ประมวลผลเป้าหมาย| Vision[Vision Pipeline - vision.py]
-    Controller -->|คำนวณเส้นทาง BFS / A*| Nav[Path Planning - navigation.py]
-    Controller -->|บันทึกแผนที่และส่งข้อมูลสด| State[Global State & Map Persistence]
-    State -->|อัปเดตตำแหน่ง / แผนที่ / เวลา| GUI
-    Controller -->|ประเมินผล & พล็อตภาพ| Eval[Evaluation & Report Exporter]
-```
+[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/praewa-japan1350/final-project?utm_source=readme&utm_medium=badge)
 
 ---
 
